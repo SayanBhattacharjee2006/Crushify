@@ -1,0 +1,1 @@
+export const  DEFAULT_AVATAR_URL = "https://res.cloudinary.com/dfgi5b68f/image/upload/v1770393439/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69_ykpvio.jpg";

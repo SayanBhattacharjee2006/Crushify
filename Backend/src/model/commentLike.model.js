@@ -16,5 +16,5 @@ const commentLikeSchema = new mongoose.Schema({
 
 
 commentLikeSchema.index({comment:1,likedBy:1},{unique:true});
-
+commentLikeSchema.index({ likedBy: 1, createdAt: -1});
 export const CommentLike = mongoose.model("CommentLike", commentLikeSchema);

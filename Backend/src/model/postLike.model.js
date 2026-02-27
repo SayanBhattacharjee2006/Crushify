@@ -14,5 +14,6 @@ const postLikeSchema = new mongoose.Schema({
 }, {timestamps:true})
 
 postLikeSchema.index({post:1,likedBy:1},{unique:true});
+postLikeSchema.index({likedBy:1, createdAt: -1});
 
 export const PostLike = mongoose.model("PostLike", postLikeSchema);

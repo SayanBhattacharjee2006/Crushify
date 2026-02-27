@@ -4,7 +4,8 @@ import {
     deletePost,
     getPostDetails,
     getFeed,
-    getAllComents,
+    getAllComments,
+    getAllReplies
 } from "../controllers/post.controller.js"
 import {
     createComment,
@@ -25,26 +26,11 @@ router.get("/:postId",getPostDetails);
 router.post("/:postId/like",likePost)
 router.delete("/:postId/like",unLikePost)
 router.post("/:postId/comments",createComment)
-router.get("/:postId/comments",getAllComents)
+router.get("/:postId/comments",getAllComments)
 router.delete("/:postId/comments/:commentId",deleteComment)
 router.post("/:postId/comments/:commentId/like",likeComment)
 router.delete("/:postId/comments/:commentId/like",unLikeComment)
+router.get("/:postId/comments/:commentId/replies",getAllReplies)
 
 export default router;
 
-
-// {
-//   post: {
-//     id,
-//     caption,
-//     imageURL,
-//     uploader,
-//     likeCount,
-//     commentsCount,
-//     createdAt
-//   },
-//   viewer: {
-//     isLikedByMe,
-//     isOwner
-//   }
-// }

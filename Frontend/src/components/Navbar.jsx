@@ -49,7 +49,7 @@ function Navbar() {
                             </span>
                         </NavLink>
 
-                        <NavLink to="/app/features">
+                        <NavLink to="/app/post">
                             <span className="text-xl hover:text-[#4F39F6] dark:hover:text-[#4F39F6]">
                                 Post
                             </span>

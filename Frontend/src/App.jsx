@@ -11,6 +11,7 @@ import AddProfilePicture from "./pages/AddProfilePicture.jsx";
 import CompleteProfile from "./pages/CompleteProfile.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
+import PostPage from "./pages/PostPage.jsx";
 
 function App() {
     const { checkAuth } = useAuthStore();
@@ -52,6 +53,10 @@ function App() {
                 <Route
                     path="home"
                     element={<HomePage/>}
+                />
+                <Route
+                    path="post"
+                    element={<PostPage/>}
                 />
                 <Route
                     path="profile/:id"

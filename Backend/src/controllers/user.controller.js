@@ -392,4 +392,6 @@ export {
     completeProfile,
     updateProfile,
     getUserDetails,
+    getAllPostsByUserId,
+    getAllLikedPosts
 };

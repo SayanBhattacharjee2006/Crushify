@@ -12,5 +12,14 @@ export const postServices = {
             console.log("UPLOAD ERROR:", error.response?.data || error.message);
             throw error;
         }
+    }, 
+    loadHomeFeed: async (lastPostId, limit) =>{
+        try {
+            const response = await api.get(`/posts/feed`, {params:{lastPostId, limit}});
+            return response.data
+        } catch(error) {
+            console.log("LOAD HOME FEED ERROR:", error.response?.data || error.message);
+            throw error
+        }
     }
 }

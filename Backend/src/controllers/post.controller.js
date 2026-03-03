@@ -312,8 +312,6 @@ const getFeed = async (req, res) => {
                     createdAt: 1,
                     isLikedByMe: 1,
                     isFollowingUploader: 1,
-                    postLikedByUserDoc: 0,
-                    uploaderFollowedByUserDoc: 0,
                 },
             },
         ]);

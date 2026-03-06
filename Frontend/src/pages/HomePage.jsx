@@ -2,15 +2,17 @@ import React, { useEffect, useRef } from "react";
 import { usePostStore } from "../stores/post.store.js";
 import PostCard from "../components/PostCard.jsx";
 import { useOnInView } from "react-intersection-observer";
+import { useAuthStore } from "../stores/auth.store.js";
+
 function HomePage() {
-    const observerRef = useOnInView((inView,entry)=>{
-      if(inView && hasMore && !isFetchingMore){
-        console.log("IN VIEW:",entry.target);
-        loadMore();
-      }
-    })
-  
-  
+    const observerRef = useOnInView((inView, entry) => {
+        if (inView && hasMore && !isFetchingMore) {
+            console.log("IN VIEW:", entry.target);
+            loadMore();
+        }
+    });
+
+
     const {
         isLoading,
         posts,
@@ -20,6 +22,8 @@ function HomePage() {
         loadHomeFeed,
         loadMore,
     } = usePostStore();
+
+
     useEffect(() => {
         loadHomeFeed();
     }, []);
@@ -55,16 +59,18 @@ function HomePage() {
                 {posts.length === 0 ? (
                     <div>No posts found</div>
                 ) : (
-                    posts.map((post) => <PostCard key={post._id} post={post} />)
+                    posts.map((post) => (
+                    <PostCard 
+                        key={post._id} 
+                        post={post}
+                    />))
                 )}
             </div>
-            {
-              isFetchingMore && (
+            {isFetchingMore && (
                 <div>
-                  <p>Loading More...</p>
+                    <p>Loading More...</p>
                 </div>
-              )
-            }
+            )}
             <div ref={observerRef} className="h-10"></div>
         </>
     );

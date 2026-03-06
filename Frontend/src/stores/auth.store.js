@@ -201,15 +201,13 @@ export const useAuthStore = create((set) => ({
     },
     followUser: async (id) => {
         try {
-            set({ isLoading: true });
             const res = await userServices.followUser(id);
-            set({ isLoading: false});
+
             return {
                 success: true,
-                followStatus: res.success
-            }
+                followStatus: res.success,
+            };
         } catch (error) {
-            set({ isLoading: false });
             return {
                 success: false,
                 error:
@@ -220,15 +218,13 @@ export const useAuthStore = create((set) => ({
     },
     unfollowUser: async (id) => {
         try {
-            set({ isLoading: true})
             const res = await userServices.unfollowUser(id);
-            set({ isLoading: false})
+
             return {
                 success: true,
-                followStatus: res.success
-            }
+                followStatus: res.success,
+            };
         } catch (error) {
-            set({ isLoading: false });
             return {
                 success: false,
                 error:
@@ -236,5 +232,5 @@ export const useAuthStore = create((set) => ({
                     "Unfollowing user failed. Try again.",
             };
         }
-    }
+    },
 }));

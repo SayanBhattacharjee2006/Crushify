@@ -6,6 +6,7 @@ import {Comment} from "../model/comment.model.js";
 
 const likePost = async (req, res) => {
     try {
+        
         const userId = req.user._id;
         const { postId } = req.params;
 
@@ -34,7 +35,11 @@ const likePost = async (req, res) => {
             likedBy: userId,
         });
 
-        await post.updateOne({ $inc: { likeCount: 1 } });
+        if(newLikeOnPost){
+            await post.updateOne({ $inc: { likeCount: 1 } });
+        }
+
+        console.log(`NEW LIKE REQUEST HANDLED: WITH POST ID: ${postId} and USER ID: ${userId}`);
 
         return res.status(201).json({
             message: "Post liked successfully",
@@ -112,6 +117,8 @@ const unLikePost = async (req, res) => {
     try {
         const userId = req.user._id;
         const { postId } = req.params;
+
+        
 
         const post = await Post.findById(postId);
         if (!post || post.isDeleted) {

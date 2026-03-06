@@ -25,6 +25,15 @@ React + Vite frontend for the CruSify social app.
 - Onboarding flow:
   - Profile photo step (`/app/add-profile-picture`) supports file picking, image-type checks, size limit checks, preview, upload, and skip.
   - Profile completion step (`/app/complete-profile`) submits username, bio, pronouns, phone number, gender, and age.
+- Home feed and pagination:
+  - `/app/home` fetches feed posts through Zustand (`loadHomeFeed`) and renders cards.
+  - Cursor-based pagination is implemented with `lastPostId`, `hasMore`, and `isFetchingMore`.
+  - Infinite scroll trigger is wired using `react-intersection-observer` (`useOnInView`) to call `loadMore`.
+- Post creation flow:
+  - `/app/post` has a create-post UI connected to `uploadPost`.
+  - Supports click-to-upload and drag-and-drop image selection.
+  - Client-side checks enforce image type, 10MB max size, and at least one of description/image.
+  - Includes image preview/remove, discard action, and redirect to `/app/home` after successful upload.
 - Profile and follow features:
   - Profile route (`/app/profile/:id`) loads own/other user details.
   - Follow status check, follow, and unfollow actions are connected to backend.
@@ -35,14 +44,14 @@ React + Vite frontend for the CruSify social app.
 
 ### Upcoming Features
 
-- Home feed implementation:
-  - `/app/home` is currently a placeholder and still needs feed cards, loading states, and pagination/infinite scroll using `/posts/feed`.
-- Post workflow from frontend:
-  - Create post UI, post details page, and post list rendering are not yet implemented.
+- Feed UX polish:
+  - Home feed still needs richer error handling/skeleton states and better end-of-feed messaging.
+  - Current feed page size is hardcoded in store calls and should be made configurable.
+- Post engagement and details:
+  - Single-post details route/page is still pending.
   - Post actions (like, comments, replies) need frontend components and store/service integration.
 - Missing linked routes/pages:
   - UI currently links to routes that do not exist yet:
-    - `/app/features`
     - `/app/edit-profile`
     - `/app/details`
     - `forgot-password`

@@ -19,8 +19,8 @@ const router = express.Router();
 
 router.use(verifyJwt);
 
-router.post("/",upload.single("postImage"),createPost);
-router.get("/feed",getFeed)
+router.post("/",upload.single("postImage"),createPost); //frontend done
+router.get("/feed",getFeed) // frontend done
 router.delete("/:postId",deletePost);
 router.get("/:postId",getPostDetails);
 router.post("/:postId/like",likePost)

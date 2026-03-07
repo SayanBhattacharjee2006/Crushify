@@ -187,5 +187,18 @@ export const usePostStore = create((set) => ({
                     "Add Comment Failed ! Try Again | Sorry for the inconvenience",
             }   
         }
+    },
+    getAllComments: async(postId, lastCommentId) => {
+        try {
+            const response = await postServices.getAllComments(postId, lastCommentId, 2);
+            return response;
+        } catch (error) {
+            return {
+                success: false,
+                error: 
+                    error.response?.data?.message ||
+                    "Get All Comments Failed ! Try Again | Sorry for the inconvenience",
+            }
+        }
     }
 }));

@@ -94,6 +94,7 @@ function PostCard({ post}) {
                             src={post?.uploader?.avatarURL}
                             alt="post uploader profile pic"
                             className="w-full h-full"
+                            // onClick={()=>navigate(`/app/post/${post._id}`)}
                         />
                     </div>
                     <div className="flex flex-col items-start px-1 md:px-2">

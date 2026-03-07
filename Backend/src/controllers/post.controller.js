@@ -477,6 +477,7 @@ const getAllComments = async (req, res) => {
             pagination: {
                 limit,
                 hasMore,
+                lastCommentId: allComments[allComments.length - 1]?._id,
             },
             success: true,
         });

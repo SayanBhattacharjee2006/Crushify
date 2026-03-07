@@ -70,4 +70,19 @@ export const postServices = {
             console.log("ADD COMMENT ERROR:",error.response?.data || error.message);
             throw error;
         }
-    }};
+    },
+    getAllComments: async(postId, lastCommentId, limit) => {
+        try{
+            const res = await api.get(`/posts/${postId}/comments`,{
+                params:{
+                    lastCommentId,
+                    limit
+                }
+            });
+            return res.data;
+        }catch(error){
+            console.log("ADD COMMENT ERROR:",error.response?.data || error.message);
+            throw error;
+        }
+    }
+};

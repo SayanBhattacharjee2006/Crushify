@@ -25,7 +25,7 @@ router.delete("/:postId",deletePost);
 router.get("/:postId",getPostDetails); // frontend done
 router.post("/:postId/like",likePost) // frontend done
 router.delete("/:postId/like",unLikePost) // frontend done
-router.post("/:postId/comments",createComment)
+router.post("/:postId/comments",createComment) // frontend done
 router.get("/:postId/comments",getAllComments)
 router.delete("/:postId/comments/:commentId",deleteComment)
 router.post("/:postId/comments/:commentId/like",likeComment)

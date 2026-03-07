@@ -10,6 +10,7 @@ function Input({
     onChange,
     placeholder,
     required,
+    className,
     ...props
 }) {
     const isPassword = type === "password";
@@ -34,7 +35,7 @@ function Input({
                     placeholder={placeholder}
                     required={required}
                     {...props}
-                    className="border  border-neutral-400 min-h-8 rounded-sm w-full px-2 "
+                    className={`border  border-neutral-400 min-h-8 rounded-sm w-full px-2 ${className}`}
                 />
 
                 {isPassword && (

@@ -53,4 +53,21 @@ export const postServices = {
             throw error;
         }
     },
-};
+    getPostDetails: async(postId)=>{
+        try{
+            const res = await api.get(`/posts/${postId}`);
+            return res.data;
+        }catch(error){
+            console.log("GET POST DETAILS ERROR:",error.response?.data || error.message);
+            throw error;
+        }
+    },
+    addComment: async(postId,data)=>{
+        try{
+            const res = await api.post(`/posts/${postId}/comments`,data);
+            return res.data;
+        }catch(error){
+            console.log("ADD COMMENT ERROR:",error.response?.data || error.message);
+            throw error;
+        }
+    }};

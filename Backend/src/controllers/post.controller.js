@@ -128,7 +128,7 @@ const getPostDetails = async (req, res) => {
     try {
         const { postId } = req.params;
 
-        const post = await Post.findById(postId).populate("uploader");
+        const post = await Post.findById(postId).populate("uploader","fullname username avatarURL");
 
         if (!post) {
             return res.status(404).json({
@@ -149,18 +149,28 @@ const getPostDetails = async (req, res) => {
             user: req.user._id,
         });
 
+        const isFollowingUploader = await Follow.exists({
+            follower: req.user._id,
+            following: post.uploader._id,
+        });
+
         return res.status(200).json({
             message: "Post found",
-            data: {
-                imageURL: post.imageURL,
+            post: {
+                _id: post._id,
+                uploader: {
+                    _id: post.uploader._id,
+                    fullname: post.uploader.fullname,
+                    username: post.uploader.username,
+                    avatarURL: post.uploader.avatarURL,
+                },
                 description: post.description,
-                uploaderFullName: post.uploader.fullname,
-                uploaderUsername: post.uploader.username,
-                uploaderId: post.uploader._id,
-                uploaderProfileImage: post.uploader.profileImage,
+                imageURL: post.imageURL,
                 likeCount: post.likeCount,
                 commentsCount: post.commentsCount,
-                isLiked: isLikedByUser ? true : false,
+                createdAt: post.createdAt,
+                isLikedByMe: !!isLikedByUser,
+                isFollowingUploader: !!isFollowingUploader,
             },
             success: true,
             postedAt: post.createdAt,
@@ -337,9 +347,8 @@ const getAllComments = async (req, res) => {
     try {
         const { postId } = req.params;
         const userId = req.user._id;
-        const page = parseInt(req.query.page) || 1;
+        const { lastCommentId } = req.query;
         const limit = parseInt(req.query.limit) || 15;
-        const skip = (page - 1) * limit;
 
         if (!mongoose.Types.ObjectId.isValid(postId)) {
             return res.status(400).json({
@@ -348,27 +357,39 @@ const getAllComments = async (req, res) => {
             });
         }
 
+        if (lastCommentId && !mongoose.Types.ObjectId.isValid(lastCommentId)) {
+            return res.status(400).json({
+                message: "Invalid last comment id",
+                success: false,
+            });
+        }
+
         const objectPostId = new mongoose.Types.ObjectId(postId);
         const currentUserObjectId = new mongoose.Types.ObjectId(userId);
 
+        let matchCondition = {
+            post: objectPostId,
+            isDeleted: false,
+            parentComment: null,
+        };
+
+        if (lastCommentId) {
+            matchCondition._id = {
+                $lt: new mongoose.Types.ObjectId(lastCommentId),
+            };
+        }
+
         const allComments = await Comment.aggregate([
             {
-                $match: {
-                    post: objectPostId,
-                    isDeleted: false,
-                    parentComment: null,
-                },
+                $match: matchCondition,
             },
             {
                 $sort: {
-                    createdAt: -1,
+                    _id: -1,
                 },
             },
             {
-                $skip: skip,
-            },
-            {
-                $limit: limit,
+                $limit: limit + 1,
             },
             {
                 $lookup: {
@@ -440,17 +461,22 @@ const getAllComments = async (req, res) => {
                     repliesCount: 1,
                     createdAt: 1,
                     isLikedByMe: 1,
+                    repliedTo: 1,
                 },
             },
         ]);
+
+        const hasMore = allComments.length > limit;
+        if (hasMore) {
+            allComments.pop();
+        }
 
         return res.status(200).json({
             message: "all comments fetched successfully",
             comments: allComments,
             pagination: {
-                page,
                 limit,
-                hasMore: allComments.length === limit,
+                hasMore,
             },
             success: true,
         });
@@ -464,129 +490,7 @@ const getAllComments = async (req, res) => {
     }
 };
 
-const getAllReplies = async (req, res) => {
-    try {
-        const { postId, commentId } = req.params;
-
-        if (!mongoose.Types.ObjectId.isValid(postId)) {
-            return res.status(400).json({
-                message: "Invalid post id",
-                success: false,
-            });
-        }
-
-        if (!mongoose.Types.ObjectId.isValid(commentId)) {
-            return res.status(400).json({
-                message: "Invalid comment id",
-                success: false,
-            });
-        }
-
-        const objectPostId = new mongoose.Types.ObjectId(postId);
-        const objectCommentId = new mongoose.Types.ObjectId(commentId);
-        const ObjectuserId = new mongoose.Types.ObjectId(req.user._id);
-
-        const replies = await Comment.aggregate([
-            {
-                $match: {
-                    post: objectPostId,
-                    parentComment: objectCommentId,
-                    isDeleted: false,
-                },
-            },
-            {
-                $sort: {
-                    createdAt: 1,
-                },
-            },
-            {
-                $lookup: {
-                    from: "users",
-                    let: { userId: "$commentedBy" },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $eq: ["$_id", "$$userId"],
-                                },
-                            },
-                        },
-                        {
-                            $project: {
-                                fullname: 1,
-                                username: 1,
-                                avatarURL: 1,
-                            },
-                        },
-                    ],
-                    as: "commentedBy",
-                },
-            },
-            {
-                $unwind:"$commentedBy"
-            },
-            {
-                $lookup:{
-                    from:"commentlikes",
-                    let:{commentId:"$_id"},
-                    pipeline:[
-                        {
-                            $match: {
-                                $expr: {
-                                    $and: [
-                                        {
-                                            $eq: [
-                                                "$likedBy",
-                                                ObjectuserId,
-                                            ],
-                                        },
-                                        {
-                                            $eq: ["$comment", "$$commentId"],
-                                        },
-                                    ],
-                                },
-                            },
-                        },
-                    ],
-                    as:"isLikedByUser"
-                }
-            },
-            {
-                $addFields: {
-                    isLikedByMe: {
-                        $gt: [{ $size: "$isLikedByUser" }, 0],
-                    },
-                },
-            },
-            {
-                $project: {
-                    commentedBy: 1,
-                    content: 1,
-                    parentComment: 1,
-                    likeCount: 1,
-                    repliesCount: 1,
-                    createdAt: 1,
-                    isLikedByMe: 1,
-                    isLikedByUser:0
-                },
-            }
-        ]);
-
-        return res.status(200).json({
-            message: "all replies fetched successfully",
-            replies: replies,
-            success: true,
-        });
-
-    } catch (error) {
-        console.log("Error while fetching post replies", error?.message);
-        return res.status(500).json({
-            message: "Error while fetching post replies ",
-            success: false,
-            error: error?.message,
-        });
-    }
-};
+const getAllReplies = async (req, res) => {};
 
 export {
     createPost,

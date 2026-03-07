@@ -23,6 +23,12 @@ const commentSchema = new mongoose.Schema({
         index: true,
         default: null
     },
+    repliedTo:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"User",
+        default:null,
+        index:true
+    },
     likeCount:{
         type: Number,
         default:0

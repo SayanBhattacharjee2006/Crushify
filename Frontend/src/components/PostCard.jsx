@@ -5,6 +5,7 @@ import { useAuthStore } from "../stores/auth.store.js";
 import { useState } from "react";
 import { usePostStore } from "../stores/post.store.js";
 import {useNavigate} from "react-router-dom"
+import React from "react";
 
 function PostCard({ post}) {
     const { user, followUser, unfollowUser } = useAuthStore();
@@ -90,24 +91,24 @@ function PostCard({ post}) {
                 <div className="flex gap-2 justify-center text-center items-center">
                     <div className="rounded-full w-10 h-10 overflow-hidden object-cover ring-1 ring-gray-200">
                         <img
-                            src={post.uploader.avatarURL}
+                            src={post?.uploader?.avatarURL}
                             alt="post uploader profile pic"
                             className="w-full h-full"
                         />
                     </div>
                     <div className="flex flex-col items-start px-1 md:px-2">
                         <span className="font-semibold text-lg md:text-xl leading-5">
-                            {post.uploader.fullname}
+                            {post?.uploader?.fullname}
                         </span>
                         <span className="text-sm text-gray-500">
-                            @{post.uploader.username || "username"}
+                            @{post?.uploader?.username || "username"}
                         </span>
                     </div>
                 </div>
                 {/* follow unfollow button */}
-                {post.uploader._id !== user._id && (
+                {post?.uploader?._id !== user._id && (
                     <div className="text-lg md:text-xl">
-                        {post.isFollowingUploader ? (
+                        {post?.isFollowingUploader ? (
                             <button
                                 className="px-4 md:px-6 cursor-pointer md:py-1 bg-indigo-600 text-white rounded-lg"
                                 onClick={handleUnfollow}

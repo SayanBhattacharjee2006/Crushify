@@ -22,15 +22,15 @@ router.use(verifyJwt);
 router.post("/",upload.single("postImage"),createPost); //frontend done
 router.get("/feed",getFeed) // frontend done
 router.delete("/:postId",deletePost);
-router.get("/:postId",getPostDetails);
-router.post("/:postId/like",likePost)
-router.delete("/:postId/like",unLikePost)
+router.get("/:postId",getPostDetails); // frontend done
+router.post("/:postId/like",likePost) // frontend done
+router.delete("/:postId/like",unLikePost) // frontend done
 router.post("/:postId/comments",createComment)
 router.get("/:postId/comments",getAllComments)
 router.delete("/:postId/comments/:commentId",deleteComment)
 router.post("/:postId/comments/:commentId/like",likeComment)
 router.delete("/:postId/comments/:commentId/like",unLikeComment)
-router.get("/:postId/comments/:commentId/replies",getAllReplies)
+router.get("/comments/:commentId/replies",getAllReplies)
 
 export default router;
 

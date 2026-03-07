@@ -132,7 +132,6 @@ export const usePostStore = create((set) => ({
             };
         } 
     },
-
     postUnLike: async (postId) => {
         try {
             console.log("REACHED POST UNLIKE STORE");
@@ -160,4 +159,33 @@ export const usePostStore = create((set) => ({
             };
         } 
     },
+    getPostDetails: async(postId) => {
+        try {
+            set({isLoading: true});
+            const res = await postServices.getPostDetails(postId);
+            return res; 
+        } catch (error) {
+            return {
+                success: false,
+                error:
+                    error.response?.data?.message ||
+                    "Get Post Details Failed ! Try Again | Sorry for the inconvenience",
+            }
+        } finally {
+            set({isLoading: false});
+        }
+    },
+    addComment: async(postId, data) => {
+        try {
+            const response = await postServices.addComment(postId, data);
+            return response;
+        } catch (error) {
+            return {
+                success: false,
+                error:
+                    error.response?.data?.message ||
+                    "Add Comment Failed ! Try Again | Sorry for the inconvenience",
+            }   
+        }
+    }
 }));

@@ -3,13 +3,21 @@ import { Post } from "../model/post.model.js";
 
 const createComment = async (req, res) => {
     try {
-        const content = req.body.content.trim();
-        const parentCommentId = req.body.parentCommentId;
+        const content = req.body.content?.trim();
+        let parentCommentId = req.body.parentCommentId;
+        const repliedToId = req.body.repliedToId || null;
         const { postId } = req.params;
 
         if (!content) {
             return res.status(400).json({
                 message: "Missing required fields",
+                success: false,
+            });
+        }
+
+        if(repliedToId && !parentCommentId){
+            return res.status(400).json({
+                message: "cannot reply to a user without a parent comment",
                 success: false,
             });
         }
@@ -26,19 +34,24 @@ const createComment = async (req, res) => {
         let newComment;
 
         if (parentCommentId) {
-            const parentComment = await Comment.findById(parentCommentId);
-            if (!parentComment) {
+            const parentCommentDoc = await Comment.findById(parentCommentId);
+            if (!parentCommentDoc) {
                 return res.status(404).json({
                     message: "Parent comment does not exist",
                     success: false,
                 });
             }
 
-            if (!parentComment.post.equals(postId)) {
+            if (!parentCommentDoc.post.equals(postId)) {
                 return res.status(400).json({
                     message: "Parent comment does not belong to this post",
                     success: false,
                 });
+            }
+            let rootComment = parentCommentDoc;
+            if(parentCommentDoc.parentComment){
+                rootComment = await Comment.findById(parentCommentDoc.parentComment);
+                parentCommentId = rootComment._id;
             }
 
             // create comment with parentCommentID
@@ -49,10 +62,10 @@ const createComment = async (req, res) => {
                 parentComment: parentCommentId,
                 likeCount: 0,
                 repliesCount: 0,
-                isDeleted: false
+                isDeleted: false,
+                repliedTo: repliedToId
             });
-            parentComment.repliesCount += 1;
-            await parentComment.save();
+            await Comment.findByIdAndUpdate(rootComment._id, { $inc: { repliesCount: 1 } });
 
         } else {
             newComment = await Comment.create({
@@ -62,7 +75,8 @@ const createComment = async (req, res) => {
                 parentComment: null,
                 likeCount: 0,
                 repliesCount: 0,
-                isDeleted: false
+                isDeleted: false,
+                repliedTo: repliedToId
             });
             await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
         }
@@ -153,11 +167,13 @@ const deleteComment = async (req,res) => {
                         })
             }
 
-            parentComment.repliesCount -= 1;
-            await parentComment.save();
+            // parentComment.repliesCount -= 1;
+            // await parentComment.save();
+            await Comment.findByIdAndUpdate(parentComment._id, { $inc: { repliesCount: -1 } });
         } else {
-            post.commentsCount -= 1;
-            await post.save();
+            // post.commentsCount -= 1;
+            // await post.save();
+            await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: -1 } });
         }
 
         await Comment.findByIdAndUpdate(commentId, {isDeleted:true})

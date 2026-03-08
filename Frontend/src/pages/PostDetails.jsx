@@ -1,39 +1,114 @@
 import { FaArrowLeft } from "react-icons/fa";
 import React from "react";
-import { useParams , useNavigate} from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { usePostStore } from "../stores/post.store.js";
 import PostCard from "../components/PostCard.jsx";
 import { useAuthStore } from "../stores/auth.store.js";
 import CommentCard from "../components/CommentCard.jsx";
+import { useOnInView } from "react-intersection-observer";
+
 function PostDetails() {
-    const { getPostDetails, isLoading, addComment, getAllComments } =
-        usePostStore();
+    const {
+        getPostDetails,
+        isLoading,
+        addComment,
+        getAllComments,
+        likeComment,
+        unLikeComment,
+        postLike,
+        postUnLike,
+        toggleFollowStatus
+    } = usePostStore();
     const [commentContent, setCommentContent] = React.useState("");
     const [isCommentAdding, setIsCommentAdding] = React.useState(false);
     const [allComments, setAllComments] = React.useState([]);
     const [lastCommentId, setLastCommentId] = React.useState(null);
+    const [isFetchingMoreComment, setIsFetchingMoreComment] =
+        React.useState(false);
+    const [hasMore, setHasMore] = React.useState(true);
     const [error, setError] = React.useState(null);
     const [post, setPost] = React.useState(null);
-    const { user } = useAuthStore();
+    const { user, followUser, unfollowUser } = useAuthStore();
     const { id } = useParams();
     const navigate = useNavigate();
 
+    const commentObserverRef = useOnInView(async (inView) => {
+        if (inView && hasMore && !isCommentAdding && !isFetchingMoreComment) {
+            setIsFetchingMoreComment(true);
+            try {
+                const res = await getAllComments(id, lastCommentId);
+                console.log("INFINITE SCROLL", res);
+                if (res.success) {
+                    setLastCommentId(res.pagination.lastCommentId);
+                    setHasMore(res.pagination.hasMore);
+                    setAllComments((prev) => [...prev, ...res.comments]);
+                }
+            } finally {
+                setIsFetchingMoreComment(false);
+            }
+        }
+    });
+
     React.useEffect(() => {
         const fetchPostDetails = async () => {
+            setAllComments([]);
+            setLastCommentId(null);
+            setHasMore(true);
+            setIsFetchingMoreComment(false);
+
             const [postResponse, commentResponse] = await Promise.all([
                 getPostDetails(id),
                 getAllComments(id, lastCommentId),
-            ])
-            
+            ]);
+
             // console.log(res);
             // console.log(commentResponse);
             setAllComments(commentResponse.comments);
             setLastCommentId(commentResponse.pagination.lastCommentId);
             setPost(postResponse.post);
+            setHasMore(commentResponse.pagination.hasMore);
         };
 
         fetchPostDetails();
     }, [id]);
+
+    const handleFollow = async (userId) => {
+        const response = await followUser(userId);
+
+        if (response.success) {
+            toggleFollowStatus(userId);
+            setPost((prev) => ({
+                ...prev,
+                isFollowingUploader: true,
+            }))
+        }
+    };
+    const handleUnfollow = async (userId) => {
+        const response = await unfollowUser(userId);
+        if (response.success) {
+            toggleFollowStatus(userId);
+            setPost((prev) => ({
+                ...prev,
+                isFollowingUploader: false,
+            }))
+        }
+    };
+    const handlePostLike = async (postId) => {
+        const response = await  postLike(postId);
+        setPost((prev) => ({
+            ...prev,
+            likeCount: prev.likeCount + 1,
+            isLikedByMe: true
+        }))
+    };
+    const handlePostUnLike = async (postId) => {
+        const response = await postUnLike(postId);
+        setPost((prev) => ({
+            ...prev,
+            likeCount: prev.likeCount - 1,
+            isLikedByMe: false
+        }))
+    };
 
     const handleAddComment = async (e) => {
         e.preventDefault();
@@ -52,7 +127,7 @@ function PostDetails() {
                     ...prev,
                     commentsCount: prev.commentsCount + 1,
                 }));
-                setAllComments((prev) => [ res.comment,...prev]);
+                setAllComments((prev) => [res.comment, ...prev]);
             }
 
             console.log(res);
@@ -63,20 +138,67 @@ function PostDetails() {
     const handleInputChange = (e) => {
         setCommentContent(e.target.value);
     };
+
+    const likeCommentHandler = async (commentId) => {
+        const res = await likeComment(id, commentId);
+        if (res.success) {
+            setAllComments((prev) =>
+                prev.map((comment) => {
+                    if (comment._id === commentId) {
+                        return {
+                            ...comment,
+                            likeCount: comment.likeCount + 1,
+                            isLikedByMe: true,
+                        };
+                    }
+                    return comment;
+                }),
+            );
+        }
+    };
+
+    const unLikeCommentHandler = async (commentId) => {
+        const res = await unLikeComment(id, commentId);
+        if (res.success) {
+            setAllComments((prev) =>
+                prev.map((comment) => {
+                    if (comment._id === commentId) {
+                        return {
+                            ...comment,
+                            likeCount: comment.likeCount - 1,
+                            isLikedByMe: false,
+                        };
+                    }
+                    return comment;
+                }),
+            );
+        }
+    };
+
     return (
         <div className="flex justify-center items-center flex-col gap-5">
             {/* back button */}
             <div className="w-full leading-0 mt-3">
-                <button 
-                onClick={() => navigate("../home")} className="flex gap-1 items-center hover:bg-gray-600 rounded-2xl p-2" >
+                <button
+                    onClick={() => navigate("../home")}
+                    className="flex gap-1 items-center dark:hover:bg-gray-700 hover:bg-gray-200 rounded-2xl p-2"
+                >
                     <FaArrowLeft />
-                    <span>
-                         Back to feed
-                    </span>
+                    <span>Back to feed</span>
                 </button>
             </div>
             {/* post */}
-            {isLoading || !post ? <p>Loading...</p> : <PostCard post={post} />}
+            {isLoading || !post ? (
+                <p>Loading...</p>
+            ) : (
+                <PostCard
+                    onFollow={handleFollow}
+                    onUnFollow={handleUnfollow}
+                    onPostLike={handlePostLike}
+                    onPostUnLike={handlePostUnLike}
+                    post={post}
+                />
+            )}
 
             {/* add comment */}
             <div className="flex gap-2 w-full items-center border p-4 rounded-2xl border-gray-200 dark:border-gray-600 shadow-md   dark:shadow-gray-800">
@@ -109,16 +231,26 @@ function PostDetails() {
 
             {/* comment list */}
             <div className="w-full p-3 flex flex-col gap-5 rounded-2xl shadow-md dark:shadow-gray-800 border border-gray-200 dark:border-gray-600">
-                <div className="flex gap-3 items-baseline" >
+                <div className="flex gap-3 items-baseline">
                     <span className="text-xl font-semibold">COMMENTS</span>
-                    <span className="text-gray-400">{"(" + post?.commentsCount + ")"}</span>
+                    <span className="text-gray-400">
+                        {"(" + post?.commentsCount + ")"}
+                    </span>
                 </div>
-                {allComments && allComments.length === 0 ? 
-                    <p className="text-gray-400">No comments yet</p> :
+                {allComments && allComments.length === 0 ? (
+                    <p className="text-gray-400">No comments yet</p>
+                ) : (
                     allComments.map((comment) => (
-                        <CommentCard  key={comment._id} comment={comment} />
-                    ))}
+                        <CommentCard
+                            key={comment._id}
+                            comment={comment}
+                            onLike={likeCommentHandler}
+                            onUnLike={unLikeCommentHandler}
+                        />
+                    ))
+                )}
             </div>
+            <div ref={commentObserverRef} className="h-10"></div>
         </div>
     );
 }

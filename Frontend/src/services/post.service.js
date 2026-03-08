@@ -53,36 +53,73 @@ export const postServices = {
             throw error;
         }
     },
-    getPostDetails: async(postId)=>{
-        try{
+    getPostDetails: async (postId) => {
+        try {
             const res = await api.get(`/posts/${postId}`);
             return res.data;
-        }catch(error){
-            console.log("GET POST DETAILS ERROR:",error.response?.data || error.message);
+        } catch (error) {
+            console.log(
+                "GET POST DETAILS ERROR:",
+                error.response?.data || error.message,
+            );
             throw error;
         }
     },
-    addComment: async(postId,data)=>{
-        try{
-            const res = await api.post(`/posts/${postId}/comments`,data);
+    addComment: async (postId, data) => {
+        try {
+            const res = await api.post(`/posts/${postId}/comments`, data);
             return res.data;
-        }catch(error){
-            console.log("ADD COMMENT ERROR:",error.response?.data || error.message);
+        } catch (error) {
+            console.log(
+                "ADD COMMENT ERROR:",
+                error.response?.data || error.message,
+            );
             throw error;
         }
     },
-    getAllComments: async(postId, lastCommentId, limit) => {
-        try{
-            const res = await api.get(`/posts/${postId}/comments`,{
-                params:{
+    getAllComments: async (postId, lastCommentId, limit) => {
+        try {
+            const res = await api.get(`/posts/${postId}/comments`, {
+                params: {
                     lastCommentId,
-                    limit
-                }
+                    limit,
+                },
             });
             return res.data;
-        }catch(error){
-            console.log("ADD COMMENT ERROR:",error.response?.data || error.message);
+        } catch (error) {
+            console.log(
+                "ADD COMMENT ERROR:",
+                error.response?.data || error.message,
+            );
             throw error;
         }
-    }
+    },
+    addCommentLike: async (postId, commentId) => {
+        try {
+            const res = await api.post(
+                `/posts/${postId}/comments/${commentId}/like`,
+            );
+            return res.data;
+        } catch (error) {
+            console.log(
+                "ADD COMMENT LIKE ERROR:",
+                error.response?.data || error.message,
+            );
+            throw error;
+        }
+    },
+    addCommentUnLike:  async (postId, commentId) => {
+        try {
+            const res = await api.delete(
+                `/posts/${postId}/comments/${commentId}/like`,
+            );
+            return res.data;
+        } catch (error) {
+            console.log(
+                "ADD COMMENT UNLIKE ERROR:",
+                error.response?.data || error.message,
+            );
+            throw error;
+        }
+    }, 
 };

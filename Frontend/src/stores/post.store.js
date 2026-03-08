@@ -111,14 +111,18 @@ export const usePostStore = create((set) => ({
         try {
             console.log("REACHED POST LIKE STORE");
             const res = await postServices.likePost(postId);
-            if(res.success){
+            if (res.success) {
                 set((state) => ({
-                    posts: state.posts.map(post => (
+                    posts: state.posts.map((post) =>
                         post._id === postId
-                            ? { ...post, likeCount: post.likeCount + 1, isLikedByMe: true }
-                            : post
-                    ))
-                }))
+                            ? {
+                                  ...post,
+                                  likeCount: post.likeCount + 1,
+                                  isLikedByMe: true,
+                              }
+                            : post,
+                    ),
+                }));
                 return {
                     success: true,
                 };
@@ -130,26 +134,28 @@ export const usePostStore = create((set) => ({
                     error.response?.data?.message ||
                     "Post Like Failed ! Try Again | Sorry for the inconvenience",
             };
-        } 
+        }
     },
     postUnLike: async (postId) => {
         try {
             console.log("REACHED POST UNLIKE STORE");
             const res = await postServices.unLikePost(postId);
-             if(res.success){
+            if (res.success) {
                 set((state) => ({
-                    posts: state.posts.map(post => (
+                    posts: state.posts.map((post) =>
                         post._id === postId
-                            ? { ...post, likeCount: post.likeCount - 1, isLikedByMe: false }
-                            : post
-                    ))
-                }))
+                            ? {
+                                  ...post,
+                                  likeCount: post.likeCount - 1,
+                                  isLikedByMe: false,
+                              }
+                            : post,
+                    ),
+                }));
                 return {
-
                     success: true,
                 };
             }
-            
         } catch (error) {
             return {
                 success: false,
@@ -157,25 +163,25 @@ export const usePostStore = create((set) => ({
                     error.response?.data?.message ||
                     "Post UnLike Failed ! Try Again | Sorry for the inconvenience",
             };
-        } 
+        }
     },
-    getPostDetails: async(postId) => {
+    getPostDetails: async (postId) => {
         try {
-            set({isLoading: true});
+            set({ isLoading: true });
             const res = await postServices.getPostDetails(postId);
-            return res; 
+            return res;
         } catch (error) {
             return {
                 success: false,
                 error:
                     error.response?.data?.message ||
                     "Get Post Details Failed ! Try Again | Sorry for the inconvenience",
-            }
+            };
         } finally {
-            set({isLoading: false});
+            set({ isLoading: false });
         }
     },
-    addComment: async(postId, data) => {
+    addComment: async (postId, data) => {
         try {
             const response = await postServices.addComment(postId, data);
             return response;
@@ -185,20 +191,50 @@ export const usePostStore = create((set) => ({
                 error:
                     error.response?.data?.message ||
                     "Add Comment Failed ! Try Again | Sorry for the inconvenience",
-            }   
+            };
         }
     },
-    getAllComments: async(postId, lastCommentId) => {
+    getAllComments: async (postId, lastCommentId) => {
         try {
-            const response = await postServices.getAllComments(postId, lastCommentId, 2);
+            const response = await postServices.getAllComments(
+                postId,
+                lastCommentId,
+                2,
+            );
             return response;
         } catch (error) {
             return {
                 success: false,
-                error: 
+                error:
                     error.response?.data?.message ||
                     "Get All Comments Failed ! Try Again | Sorry for the inconvenience",
-            }
+            };
         }
-    }
+    },
+    likeComment: async (postId, commentId) => {
+        try {
+            const res = await postServices.addCommentLike(postId, commentId);
+            return res;
+        } catch (error) {
+            return {
+                success: false,
+                error:
+                    error.response?.data?.message ||
+                    "Like Comment Failed ! Try Again | Sorry for the inconvenience",
+            };
+        }
+    },
+    unLikeComment: async (postId, commentId) => {
+        try {
+            const res = await postServices.addCommentUnLike(postId, commentId);
+            return res;
+        } catch (error) {
+            return {
+                success: false,
+                error:
+                    error.response?.data?.message ||
+                    "UnLike Comment Failed ! Try Again | Sorry for the inconvenience",
+            };
+        }
+    },
 }));

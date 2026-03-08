@@ -53,6 +53,7 @@ const likePost = async (req, res) => {
         });
     }
 };
+
 const likeComment = async (req, res) => {
     try {
         const { commentId, postId } = req.params;

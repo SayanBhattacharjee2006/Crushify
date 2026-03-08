@@ -12,7 +12,6 @@ function HomePage() {
         }
     });
 
-
     const {
         isLoading,
         posts,
@@ -21,12 +20,39 @@ function HomePage() {
         lastPostId,
         loadHomeFeed,
         loadMore,
+        postLike,
+        postUnLike,
+        toggleFollowStatus,
     } = usePostStore();
 
+    const { followUser, unfollowUser } = useAuthStore();
 
     useEffect(() => {
         loadHomeFeed();
     }, []);
+
+    const handleUnfollow = async (userId) => {
+        const response = await unfollowUser(userId);
+        if (response.success) {
+            toggleFollowStatus(userId);
+        }
+    };
+
+    const handleFollow = async (userId) => {
+        const response = await followUser(userId);
+
+        if (response.success) {
+            toggleFollowStatus(userId);
+        }
+    };
+
+    const handleLike = async (postId) => {
+        const response = await postLike(postId);
+    };
+
+    const handleUnlike = async (postId) => {
+        const response = await postUnLike(postId);
+    };
 
     // useEffect(()=>{
     //   const observer = new IntersectionObserver((entries) => {
@@ -60,10 +86,15 @@ function HomePage() {
                     <div>No posts found</div>
                 ) : (
                     posts.map((post) => (
-                    <PostCard 
-                        key={post._id} 
-                        post={post}
-                    />))
+                        <PostCard
+                            key={post._id}
+                            post={post}
+                            onFollow={handleFollow}
+                            onUnFollow={handleUnfollow}
+                            onPostLike={handleLike}
+                            onPostUnLike={handleUnlike}
+                        />
+                    ))
                 )}
             </div>
             {isFetchingMore && (

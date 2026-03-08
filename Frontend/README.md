@@ -2,60 +2,68 @@
 
 React + Vite frontend for the CruSify social app.
 
-## Feature Status
+## Run Locally
 
-### Done Features
+1. Install dependencies:
+   - `cd Frontend`
+   - `npm install`
+2. Start the frontend:
+   - `npm run dev`
+3. Make sure backend is running on `http://localhost:5000` (Vite proxies `/api` to this target).
 
-- Auth with email/password:
-  - Register, login, logout are wired through Zustand store actions (`register`, `login`, `logout`).
-  - Forms include required-field checks and minimum password length validation.
-- OAuth sign-in:
-  - Google and GitHub OAuth redirect to backend auth routes.
-  - Callback page (`/auth/callback`) saves token, runs `checkAuth`, then routes users into onboarding.
-- Session persistence and API auth handling:
-  - JWT is stored in `localStorage` and attached to every request through Axios interceptor.
-  - On app load, token presence triggers `checkAuth`.
-  - `401` responses clear token and redirect to `/login`.
-- App routing and guard behavior:
-  - Main routes are split into `AuthLayout` and `AppLayout`.
-  - App routes redirect to login when not authenticated and no token exists.
-  - Alias redirects are implemented:
+## Scripts
+
+- `npm run dev` - start Vite dev server
+- `npm run build` - production build
+- `npm run preview` - preview production build
+- `npm run lint` - run ESLint
+
+## Implemented Features
+
+- Authentication and session:
+  - Email/password register, login, logout with Zustand auth store.
+  - Google and GitHub OAuth login.
+  - OAuth callback (`/auth/callback`) stores token and runs auth check.
+  - Axios interceptor injects bearer token and handles `401` by clearing token and redirecting to `/login`.
+- Routing and layouts:
+  - `AuthLayout` and `AppLayout` route groups.
+  - Alias redirects:
     - `/add-profile-picture` -> `/app/add-profile-picture`
     - `/complete-profile` -> `/app/complete-profile`
-- Onboarding flow:
-  - Profile photo step (`/app/add-profile-picture`) supports file picking, image-type checks, size limit checks, preview, upload, and skip.
-  - Profile completion step (`/app/complete-profile`) submits username, bio, pronouns, phone number, gender, and age.
-- Home feed and pagination:
-  - `/app/home` fetches feed posts through Zustand (`loadHomeFeed`) and renders cards.
-  - Cursor-based pagination is implemented with `lastPostId`, `hasMore`, and `isFetchingMore`.
-  - Infinite scroll trigger is wired using `react-intersection-observer` (`useOnInView`) to call `loadMore`.
-- Post creation flow:
-  - `/app/post` has a create-post UI connected to `uploadPost`.
-  - Supports click-to-upload and drag-and-drop image selection.
-  - Client-side checks enforce image type, 10MB max size, and at least one of description/image.
-  - Includes image preview/remove, discard action, and redirect to `/app/home` after successful upload.
-- Profile and follow features:
-  - Profile route (`/app/profile/:id`) loads own/other user details.
-  - Follow status check, follow, and unfollow actions are connected to backend.
-  - Profile UI shows basic identity and social counters.
-- Shared UI foundations:
-  - Reusable inputs/buttons and a password strength meter are used in auth forms.
-  - Navbar includes app navigation, logout, profile shortcut, and light/dark mode toggle.
+- Onboarding:
+  - Add profile picture flow with image type/size validation, preview, upload, and skip.
+  - Complete profile form for username, bio, pronouns, age, phone number, and gender.
+- Home feed:
+  - Feed loading with cursor-based pagination (`lastPostId`, `hasMore`, `isFetchingMore`).
+  - Infinite scroll for loading more posts.
+  - Post cards support follow/unfollow and like/unlike.
+- Post creation:
+  - Create post page with description + optional image.
+  - Drag-and-drop and click-to-upload support.
+  - Client validation for image type and 10MB max file size.
+- Post details and comments:
+  - Single post page (`/app/post/:id`) with full post view.
+  - Add comment flow.
+  - Comment listing with infinite scroll pagination.
+  - Comment like/unlike actions.
+- Profile:
+  - Profile route (`/app/profile/:id`) for own/other user.
+  - Follow status fetch + follow/unfollow actions.
+  - Basic profile identity and social counters.
+- Shared UI:
+  - Reusable input components and password strength meter.
+  - Navbar with navigation, profile shortcut, logout, and light/dark toggle.
 
-### Upcoming Features
+## Known Gaps / Pending Work
 
-- Feed UX polish:
-  - Home feed still needs richer error handling/skeleton states and better end-of-feed messaging.
-  - Current feed page size is hardcoded in store calls and should be made configurable.
-- Post engagement and details:
-  - Single-post details route/page is still pending.
-  - Post actions (like, comments, replies) need frontend components and store/service integration.
-- Missing linked routes/pages:
-  - UI currently links to routes that do not exist yet:
-    - `/app/edit-profile`
-    - `/app/details`
-    - `forgot-password`
-- Route protection consistency:
-  - `ProtectedRoute` component exists but is not yet applied in route definitions; route-level guarding should be unified.
-- Profile management improvements:
-  - Edit profile UX, details page UX, and follower/following list views are pending.
+- Route coverage:
+  - Linked but missing routes: `/app/edit-profile`, `/app/details`, and `forgot-password`.
+- Route-guard consistency:
+  - `ProtectedRoute` exists but is not wired into `App.jsx` route definitions.
+- Profile depth:
+  - Edit profile UX, user details page, and followers/following listing screens are not implemented.
+- Feed/comment UX polish:
+  - Loading/error/empty states are basic.
+  - Pagination limits are currently hardcoded in store calls.
+- Comment replies:
+  - Reply UI affordance exists, but nested reply flow is not implemented yet.

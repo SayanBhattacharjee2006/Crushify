@@ -66,8 +66,13 @@ export const postServices = {
         }
     },
     addComment: async (postId, data) => {
+        console.log("DATA AT THE SERVICE:", data);
         try {
-            const res = await api.post(`/posts/${postId}/comments`, data);
+            const res = await api.post(`/posts/${postId}/comments`, {
+                parentCommentId:data.parentComment,
+                content: data.content,
+                repliedToId: data.repliedTo
+            });
             return res.data;
         } catch (error) {
             console.log(
@@ -122,4 +127,16 @@ export const postServices = {
             throw error;
         }
     }, 
+    getAllReplies: async (commentId) => {
+        try {
+            const res = await api.get(`posts/comments/${commentId}/replies`);
+            return res.data;
+        } catch (error) {
+            console.log(
+                "GET ALL REPLIES ERROR:",
+                error.response?.data || error.message,
+            )
+            throw error;
+        }
+    }
 };

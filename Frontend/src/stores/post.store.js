@@ -3,9 +3,12 @@ import { postServices } from "../services/post.service.js";
 export const usePostStore = create((set) => ({
     posts: [],
     isLoading: false,
-    isFetchingMore: false, // used for cursor based pagination where we need to fetch more posts
-    hasMore: true, // for cursor based pagination to know if there are more posts
-    lastPostId: null, // for cursor based pagination
+    isFetchingMore: false,
+    hasMore: true, 
+    lastPostId: null,
+    repliesByCommentId:{},
+    isReplyAlreadyFetched:{},
+    isFetchingReplies:{},
 
     uploadPost: async (file, description) => {
         try {
@@ -183,7 +186,19 @@ export const usePostStore = create((set) => ({
     },
     addComment: async (postId, data) => {
         try {
+            console.log("DATA AT THE STORE:", data);
             const response = await postServices.addComment(postId, data);
+            console.log(response);
+            if(response.parentComment){
+                set((state) => ({
+                    ...state,
+                    repliesByCommentId:{
+                        ...state.repliesByCommentId,
+                        [response.parentComment]: [response.comment,...(state.repliesByCommentId[response.parentComment]  || [])],
+                    }
+                }))
+            }
+            
             return response;
         } catch (error) {
             return {
@@ -237,4 +252,50 @@ export const usePostStore = create((set) => ({
             };
         }
     },
+    getAllReplies: async (commentId) => {
+        const { isReplyAlreadyFetched } = usePostStore.getState();  
+        if(isReplyAlreadyFetched[commentId])return; 
+        try {
+            set(state=>({
+                ...state,
+                isFetchingReplies:{
+                    ...state.isFetchingReplies,
+                    [commentId]:true
+                }
+            })
+            )
+            const res = await postServices.getAllReplies(commentId);
+            set(state=>({
+                ...state,
+                isReplyAlreadyFetched: {
+                    ...state.isReplyAlreadyFetched,
+                    [commentId]: true
+                },
+                repliesByCommentId:{
+                    ...state.repliesByCommentId,
+                    [commentId]:res.replies
+                },
+                isFetchingReplies:{
+                    ...state.isFetchingReplies,
+                    [commentId]:false
+                }
+            }))
+            return res;
+        } catch (error) {
+            set(state=>({
+                ...state,
+                isFetchingReplies:{
+                    ...state.isFetchingReplies,
+                    [commentId]:false,
+                }
+            })
+            )
+            return{
+                success: false,
+                error:
+                    error.response?.data?.message ||
+                    "Get All Replies Failed ! Try Again | Sorry for the inconvenience",
+            }
+        }
+    }
 }));

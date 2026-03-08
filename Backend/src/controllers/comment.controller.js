@@ -10,6 +10,8 @@ const createComment = async (req, res) => {
         const repliedToId = req.body.repliedToId || null;
         const { postId } = req.params;
 
+        console.log("PARENTCOMMENT",parentCommentId);
+        console.log("REPLIEDTOID:",repliedToId);
         if (!content) {
             return res.status(400).json({
                 message: "Missing required fields",

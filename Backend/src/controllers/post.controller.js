@@ -491,7 +491,106 @@ const getAllComments = async (req, res) => {
     }
 };
 
-const getAllReplies = async (req, res) => {};
+const getAllReplies = async (req, res) => {
+    try{
+        const {commentId} = req.params;
+        if(!mongoose.Types.ObjectId.isValid(commentId)){
+            return {
+                message:"Invalid comment id",
+                success:false
+            }
+        } 
+
+        const replies = await Comment.aggregate([
+            {
+                $match:{
+                    parentComment: new mongoose.Types.ObjectId(commentId),
+                    isDeleted:false,
+                }
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    let: { userId: "$commentedBy" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ["$_id", "$$userId"],
+                                },
+                            },
+                        },
+                        {
+                            $project: {
+                                _id: 1,
+                                fullname: 1,
+                                username: 1,
+                                avatarURL: 1,
+                            },
+                        },
+                    ],
+                    as: "commentedBy",
+                },
+            },
+            {
+                $lookup: {
+                    from:"users",
+                    let:{userId:"$repliedTo"},
+                    pipeline:[
+                        {
+                            $match:{
+                                $expr:{
+                                    $eq:["$_id","$$userId"]
+                                }
+                            }
+                        },
+                        {
+                            $project:{
+                                _id:1,
+                                
+                                username:1,
+                                
+                            }
+                        }
+                    ],
+                    as:"repliedTo",
+                }
+            },
+            {
+                $unwind:"$commentedBy",
+            },
+            {
+                $unwind:"$repliedTo",   
+            },
+            {
+                $project: {
+                    commentedBy: 1,
+                    content: 1,
+                    post: 1,
+                    parentComment: 1,
+                    likeCount: 1,
+                    repliesCount: 1,
+                    createdAt: 1,
+                    isLikedByMe: 1,
+                    repliedTo: 1,
+                },
+            }
+        ]);
+
+        return res.status(200).json({
+            message:"All replies fetched successfully",
+            replies,
+            success:true
+        })
+    }catch(error){
+        console.log("Error while fetching replies",error?.message);
+        return res.status(500).json({
+            message:"Error while fetching replies",
+            success:false,
+            error:error?.message
+        })
+    }
+};
 
 export {
     createPost,

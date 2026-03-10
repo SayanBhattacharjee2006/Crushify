@@ -24,5 +24,13 @@ export const authServices = {
     getCurrentUser: async () => {
         const response  = await api.get("/auth/me")
         return response.data;
+    },
+    getAllFollowing:async (id) => {
+        const response = await api.get(`/users/${id}/following`);
+        return response.data;
+    },
+    getAllFollowers:(id) => {
+        const response = api.get(`/users/${id}/followers`);
+        return response.data
     }
 } 

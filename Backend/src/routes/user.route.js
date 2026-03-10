@@ -7,12 +7,12 @@ const router = Router();
 
 router.use(verifyJwt);
 
-router.post("/avatar",upload.single("avatar"),setAvatar);
+router.post("/avatar",upload.single("avatar"),setAvatar); // frontend done
 router.delete("/avatar",deleteAvatar);
-router.post("/complete-profile",completeProfile);
+router.post("/complete-profile",completeProfile); // frontend done
 router.patch("/complete-profile",updateProfile);
 router.get("/liked-posts",getAllLikedPosts);
-router.get("/:id",getUserDetails);
+router.get("/:id",getUserDetails); // frontend done
 router.get("/:id/posts",getAllPostsByUserId);
 
 export default router;

@@ -203,8 +203,8 @@ export const usePostStore = create((set) => ({
                     repliesByCommentId: {
                         ...state.repliesByCommentId,
                         [parentCommentId]: [
-                            response.comment,
                             ...(state.repliesByCommentId[parentCommentId] || []),
+                            response.comment,
                         ],
                     },
                     isReplyAlreadyFetched: {

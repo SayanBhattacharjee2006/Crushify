@@ -202,7 +202,15 @@ export const useAuthStore = create((set) => ({
     followUser: async (id) => {
         try {
             const res = await userServices.followUser(id);
-
+            if(res.success){
+                set((state) => ({
+                    ...state,
+                    user: {
+                        ...state.user,
+                        followingCount: state.user.followingCount + 1,
+                    },
+                }))
+            }
             return {
                 success: true,
                 followStatus: res.success,
@@ -219,7 +227,15 @@ export const useAuthStore = create((set) => ({
     unfollowUser: async (id) => {
         try {
             const res = await userServices.unfollowUser(id);
-
+            if(res.success){
+                set((state) => ({
+                    ...state,
+                    user: {
+                        ...state.user,
+                        followingCount: state.user.followingCount - 1,
+                    },
+                }))
+            }
             return {
                 success: true,
                 followStatus: res.success,

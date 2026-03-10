@@ -32,7 +32,7 @@ export const userServices = {
         return response.data;
     },
     followUser: async (id) => {
-        const response = await api.post(`/users/${id}/follow`);
+        const response = await api.post(`/users/${id}/follow`,);
         return response.data
     },
     unfollowUser: async (id) => {

@@ -8,9 +8,12 @@ import { IoIosSend } from "react-icons/io";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoIosArrowUp } from "react-icons/io";
 
-function ReplyCard({ comment, onLike, onUnLike }) {
-    const [showAllReplies] = React.useState(false);
+function ReplyCard({ comment, onLike, onUnLike, onReply }) {
+    
     const [showAddRepliesInput, setShowAddRepliesInput] = React.useState(false);
+    const [replyContent, setReplycontent] = React.useState("");
+    const [isReplyAdding, setIsReplyAdding] = React.useState(false);
+    const replyInputRef = React.useRef(null);
 
     const handleCommentLike = async () => {
         if (comment.isLikedByMe) {
@@ -18,6 +21,21 @@ function ReplyCard({ comment, onLike, onUnLike }) {
         } else {
             await onLike(comment._id);
         }
+    };
+
+
+    const handleAddingComment = () => {
+        if (
+            !replyContent?.trim() ||
+            replyContent.trim().length === 0 ||
+            isReplyAdding
+        )
+            return;
+        setIsReplyAdding(true);
+        onReply( replyContent,comment.commentedBy._id);
+        setReplycontent("");
+        setIsReplyAdding(false);
+        setShowAddRepliesInput(false);
     };
 
     return (
@@ -73,25 +91,6 @@ function ReplyCard({ comment, onLike, onUnLike }) {
                             <FaComment />
                             <span>Reply</span>
                         </button>
-                        {comment.repliesCount > 0 && (
-                            <button
-                                // onClick={handleShowingReplies}
-                                className="flex items-center text-indigo-500 gap-1"
-                            >
-                                <span className="flex items-baseline">
-                                    {showAllReplies ? (
-                                        <IoIosArrowUp />
-                                    ) : (
-                                        <IoIosArrowDown />
-                                    )}
-                                </span>
-                                <span>
-                                    {showAllReplies
-                                        ? "Hide replies"
-                                        : `View ${comment.repliesCount} replies`}
-                                </span>
-                            </button>
-                        )}
                     </div>
                     {showAddRepliesInput && (
                         <motion.div
@@ -102,20 +101,20 @@ function ReplyCard({ comment, onLike, onUnLike }) {
                         >
                             <motion.div className="flex-1">
                                 <input
-                                    // value={replyContent}
-                                    // ref={replyInputRef}
-                                    // onChange={(e) =>
-                                    //     setReplycontent(e.target.value)
-                                    // }
+                                    value={replyContent}
+                                    ref={replyInputRef}
+                                    onChange={(e) =>
+                                        setReplycontent(e.target.value)
+                                    }
                                     placeholder={"Add a comment..."}
                                     className="outline-1 focus:outline-1 focus:outline-gray-400 outline-gray-300 w-full bg-gray-300 p-1 rounded-2xl text-gray-600 px-3 dark:outline-gray-500"
                                 />
                             </motion.div>
                             {/* comment button */}
                             <motion.button
-                                // onClick={handleAddingComment}
+                                onClick={handleAddingComment}
                                 className="bg-indigo-500 text-white px-4 py-1 rounded-2xl hover:text-blue-600 hover:bg-white hover:border hover:border-indigo-500 border border-transparent"
-                                // disabled={isAddingReply}
+                                disabled={isReplyAdding}
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
                             >

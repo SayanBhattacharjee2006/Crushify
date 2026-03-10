@@ -10,9 +10,13 @@ import OAuthCallback from "./pages/OAuthCallback.jsx";
 import AddProfilePicture from "./pages/AddProfilePicture.jsx";
 import CompleteProfile from "./pages/CompleteProfile.jsx";
 import HomePage from "./pages/HomePage.jsx";
-import ProfilePage from "./pages/ProfilePage.jsx";
 import PostPage from "./pages/PostPage.jsx";
 import PostDetails from "./pages/PostDetails.jsx";
+import ProfileLayout from "./layouts/ProfileLayout.jsx";
+import ProfilePosts from "./components/ProfilePosts.jsx";
+import ProfileFollowers from "./components/ProfileFollowers.jsx";
+import ProfileFollowing from "./components/ProfileFollowing.jsx";
+
 
 function App() {
     const { checkAuth } = useAuthStore();
@@ -47,26 +51,15 @@ function App() {
                     path="add-profile-picture"
                     element={<AddProfilePicture />}
                 />
-                <Route
-                    path="complete-profile"
-                    element={<CompleteProfile />}
-                />
-                <Route
-                    path="home"
-                    element={<HomePage/>}
-                />
-                <Route
-                    path="post"
-                    element={<PostPage/>}
-                />
-                <Route
-                    path="post/:id"
-                    element={<PostDetails/>}
-                />
-                <Route
-                    path="profile/:id"
-                    element={<ProfilePage/>}
-                />
+                <Route path="complete-profile" element={<CompleteProfile />} />
+                <Route path="home" element={<HomePage />} />
+                <Route path="post" element={<PostPage />} />
+                <Route path="post/:id" element={<PostDetails />} />
+                <Route path="profile/:id" element={<ProfileLayout />}>
+                    <Route index element={<ProfilePosts />} />
+                    <Route path="followers" element={<ProfileFollowers/>} />
+                    <Route path="following" element={<ProfileFollowing />} />
+                </Route>
             </Route>
         </Routes>
     );

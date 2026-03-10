@@ -30,7 +30,7 @@ router.get("/:postId/comments",getAllComments)// fromend done
 router.delete("/:postId/comments/:commentId",deleteComment)
 router.post("/:postId/comments/:commentId/like",likeComment) // frontend done
 router.delete("/:postId/comments/:commentId/like",unLikeComment) // frontend done
-router.get("/comments/:commentId/replies",getAllReplies) 
+router.get("/comments/:commentId/replies",getAllReplies)// fromend done 
 
 export default router;
 

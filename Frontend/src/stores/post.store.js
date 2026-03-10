@@ -1,5 +1,15 @@
 import { create } from "zustand";
 import { postServices } from "../services/post.service.js";
+
+const updateReplyList = (state, parentCommentId, updater) => ({
+    repliesByCommentId: {
+        ...state.repliesByCommentId,
+        [parentCommentId]: updater(
+            state.repliesByCommentId[parentCommentId] || [],
+        ),
+    },
+});
+
 export const usePostStore = create((set) => ({
     posts: [],
     isLoading: false,
@@ -186,19 +196,24 @@ export const usePostStore = create((set) => ({
     },
     addComment: async (postId, data) => {
         try {
-            console.log("DATA AT THE STORE:", data);
             const response = await postServices.addComment(postId, data);
-            console.log(response);
-            if(response.parentComment){
+            if (response.comment.parentComment) {
+                const parentCommentId = response.comment.parentComment;
                 set((state) => ({
-                    ...state,
-                    repliesByCommentId:{
+                    repliesByCommentId: {
                         ...state.repliesByCommentId,
-                        [response.parentComment]: [response.comment,...(state.repliesByCommentId[response.parentComment]  || [])],
-                    }
-                }))
+                        [parentCommentId]: [
+                            response.comment,
+                            ...(state.repliesByCommentId[parentCommentId] || []),
+                        ],
+                    },
+                    isReplyAlreadyFetched: {
+                        ...state.isReplyAlreadyFetched,
+                        [parentCommentId]: true,
+                    },
+                }));
             }
-            
+
             return response;
         } catch (error) {
             return {
@@ -226,9 +241,25 @@ export const usePostStore = create((set) => ({
             };
         }
     },
-    likeComment: async (postId, commentId) => {
+    likeComment: async (postId, commentId, parentCommentId = null) => {
         try {
             const res = await postServices.addCommentLike(postId, commentId);
+            if (res.success && parentCommentId) {
+                set((state) =>
+                    updateReplyList(state, parentCommentId, (replies) =>
+                        replies.map((reply) =>
+                            reply._id === commentId
+                                ? {
+                                      ...reply,
+                                      likeCount: reply.likeCount + 1,
+                                      isLikedByMe: true,
+                                  }
+                                : reply,
+                        ),
+                    ),
+                );
+            }
+
             return res;
         } catch (error) {
             return {
@@ -239,9 +270,27 @@ export const usePostStore = create((set) => ({
             };
         }
     },
-    unLikeComment: async (postId, commentId) => {
+    unLikeComment: async (postId, commentId, parentCommentId = null) => {
         try {
             const res = await postServices.addCommentUnLike(postId, commentId);
+            if (res.success && parentCommentId) {
+                set((state) =>
+                    updateReplyList(state, parentCommentId, (replies) =>
+                        replies.map((reply) =>
+                            reply._id === commentId
+                                ? {
+                                      ...reply,
+                                      likeCount: Math.max(
+                                          0,
+                                          reply.likeCount - 1,
+                                      ),
+                                      isLikedByMe: false,
+                                  }
+                                : reply,
+                        ),
+                    ),
+                );
+            }
             return res;
         } catch (error) {
             return {

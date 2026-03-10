@@ -6,6 +6,8 @@ import { useState } from "react";
 import { usePostStore } from "../stores/post.store.js";
 import { useNavigate } from "react-router-dom";
 import React from "react";
+import { motion } from "motion/react";
+import { timeAgo } from "../utils/timeAgo.js";
 
 function PostCard({ post, onFollow, onUnFollow, onPostLike, onPostUnLike }) {
     const { user } = useAuthStore();
@@ -70,14 +72,20 @@ function PostCard({ post, onFollow, onUnFollow, onPostLike, onPostUnLike }) {
             <div className="flex justify-between items-center w-full px-2 ">
                 {/* uploader profile pic and name */}
                 <div className="flex gap-2 justify-center text-center items-center">
-                    <div className="rounded-full w-10 h-10 overflow-hidden object-cover ring-1 ring-gray-200">
-                        <img
+                    <motion.div
+                     
+                     onClick={()=>navigate(`/app/post/${post._id}`)}
+                     className="rounded-full w-10 h-10 overflow-hidden object-cover ring-1 ring-gray-200"
+                    >
+                        <motion.img
                             src={post?.uploader?.avatarURL}
                             alt="post uploader profile pic"
                             className="w-full h-full"
-                            // onClick={()=>navigate(`/app/post/${post._id}`)}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            loading="lazy"
                         />
-                    </div>
+                    </motion.div>
                     <div className="flex flex-col items-start px-1 md:px-2">
                         <span className="font-semibold text-lg md:text-xl leading-5">
                             {post?.uploader?.fullname}
@@ -90,13 +98,14 @@ function PostCard({ post, onFollow, onUnFollow, onPostLike, onPostUnLike }) {
                 {/* follow unfollow button */}
                 {post?.uploader?._id !== user._id && (
                     <div className="text-lg md:text-xl">
-                        <button
+                        <motion.button
+                            whileTap={{ scale: 0.9 }}
                             className={`cursor-pointer outline-1 rounded-2xl py-1 px-4 hover:bg-indigo-600 hover:text-white hover:font-semibold hover:outline-2 transition-all duration-100 ease-in hover:outline-offset-2 text-sm md:text-lg ${post?.isFollowingUploader ? "text-gray-500 outline-gray-500 hover:outline-indigo-600" : "bg-white text-indigo-600  border border-indigo-600 outline-indigo-600"}`}
                             onClick={handleFollow}
                             disabled={isFollowUpdating}
                         >
                             {post?.isFollowingUploader ? "Following" : "Follow"}
-                        </button>
+                        </motion.button>
                     </div>
                 )}
             </div>
@@ -144,9 +153,10 @@ function PostCard({ post, onFollow, onUnFollow, onPostLike, onPostUnLike }) {
                 </div>
                 <div className="flex items-start gap-5 text-xl md:text-2xl ">
                     <div className="flex gap-2 cursor-pointer">
-                        <button
+                        <motion.button
                             className={`cursor-pointer p-2 px-5 justify-center text-sm md:text-lg rounded-3xl flex items-center gap-1  dark:hover:bg-gray-800 dark:outline-1 dark:outline-gray-600 hover:outline-indigo-300 hover:outline-2 hover:outline-offset-2 hover:text-indigo-300 transition-all duration-100 ease-in-out outline-1  ${post.isLikedByMe ? "outline-indigo-300" : "outline-gray-300 dark:outline-gray-600"} `}
                             onClick={handleLike}
+                            whileTap={{scale:0.9}}
                             disabled={isLikeUpdating}
                         >
                             {post.isLikedByMe ? (
@@ -155,16 +165,17 @@ function PostCard({ post, onFollow, onUnFollow, onPostLike, onPostUnLike }) {
                                 <AiOutlineLike />
                             )}
                             <span>Like</span>
-                        </button>
+                        </motion.button>
                     </div>
                     <div className="flex gap-2 cursor-pointer">
-                        <button
+                        <motion.button
+                            whileTap={{scale:0.9}}
                             onClick={() => navigate(`/app/post/${post._id}`)}
                             className={`cursor-pointer p-2 rounded-3xl flex gap-2 items-center text-sm md:text-lg dark:hover:bg-gray-800 dark:outline-1 dark:outline-gray-600 hover:outline-indigo-300 hover:outline-2 hover:outline-offset-2 hover:text-indigo-300 transition-all duration-100 ease-in-out outline-1  ${post.isLikedByMe ? "outline-indigo-300" : "outline-gray-300 dark:outline-gray-600"} `}
                         >
                             <FaComment />
                             <span>Comment</span>
-                        </button>
+                        </motion.button>
                     </div>
                 </div>
             </div>

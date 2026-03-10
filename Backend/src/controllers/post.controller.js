@@ -494,11 +494,12 @@ const getAllComments = async (req, res) => {
 const getAllReplies = async (req, res) => {
     try{
         const {commentId} = req.params;
+        const currentUserObjectId = new mongoose.Types.ObjectId(req.user._id);
         if(!mongoose.Types.ObjectId.isValid(commentId)){
-            return {
+            return res.status(400).json({
                 message:"Invalid comment id",
                 success:false
-            }
+            });
         } 
 
         const replies = await Comment.aggregate([
@@ -507,6 +508,11 @@ const getAllReplies = async (req, res) => {
                     parentComment: new mongoose.Types.ObjectId(commentId),
                     isDeleted:false,
                 }
+            },
+            {
+                $sort: {
+                    _id: -1,
+                },
             },
             {
                 $lookup: {
@@ -547,7 +553,7 @@ const getAllReplies = async (req, res) => {
                         {
                             $project:{
                                 _id:1,
-                                
+                                fullname:1,
                                 username:1,
                                 
                             }
@@ -557,10 +563,43 @@ const getAllReplies = async (req, res) => {
                 }
             },
             {
+                $lookup: {
+                    from: "commentlikes",
+                    let: { commentId: "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        {
+                                            $eq: ["$likedBy", currentUserObjectId],
+                                        },
+                                        {
+                                            $eq: ["$comment", "$$commentId"],
+                                        },
+                                    ],
+                                },
+                            },
+                        },
+                    ],
+                    as: "isLikedByUser",
+                },
+            },
+            {
+                $addFields: {
+                    isLikedByMe: {
+                        $gt: [{ $size: "$isLikedByUser" }, 0],
+                    },
+                },
+            },
+            {
                 $unwind:"$commentedBy",
             },
             {
-                $unwind:"$repliedTo",   
+                $unwind:{
+                    path: "$repliedTo",
+                    preserveNullAndEmptyArrays: true,
+                },
             },
             {
                 $project: {

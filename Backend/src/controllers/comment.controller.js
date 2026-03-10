@@ -96,8 +96,14 @@ const createComment = async (req, res) => {
 
         const isCommentLikedByMe = await CommentLike.exists({
             comment: newComment._id,
-            user: req.user._id,
+            likedBy: req.user._id,
         });
+
+        const repliedToUserDetails = repliedToId
+            ? await User.findById(repliedToId).select(
+                  "username fullname avatarURL",
+              )
+            : null;
 
         return res.status(201).json({
             message: "Comment created successfully",
@@ -117,6 +123,14 @@ const createComment = async (req, res) => {
                 repliesCount: newComment.repliesCount,
                 createdAt: newComment.createdAt,
                 isLikedByMe: isCommentLikedByMe,
+                repliedTo: repliedToUserDetails
+                    ? {
+                          _id: repliedToUserDetails._id,
+                          fullname: repliedToUserDetails.fullname,
+                          username: repliedToUserDetails.username,
+                          avatarURL: repliedToUserDetails.avatarURL,
+                      }
+                    : null,
             },
         });
     } catch (error) {

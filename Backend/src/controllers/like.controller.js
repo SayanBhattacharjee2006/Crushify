@@ -105,6 +105,7 @@ const likeComment = async (req, res) => {
         return res.status(201).json({
             message: "Comment liked successfully",
             success: true,
+            comment: comment,
         });
     } catch (error) {
         console.log("LIKE COMMENT ERROR:", error?.message);

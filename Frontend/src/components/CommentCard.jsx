@@ -6,14 +6,19 @@ import { timeAgo } from "../utils/timeAgo.js";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoIosArrowUp } from "react-icons/io";
 import { usePostStore } from "../stores/post.store.js";
+import ReplyCard from "./ReplyCard.jsx";
+import { motion } from "motion/react";
+import { IoIosSend } from "react-icons/io";
 
 function CommentCard({ comment, onLike, onUnLike }) {
+    const replyInputRef = React.useRef(null);
     const [isCommentLikedByMe, setIsCommmentLikedByMe] = React.useState(
         comment.isLikedByMe,
     );
+    const [replyCount, setReplyCount] = React.useState(comment.repliesCount);
     const [showAddRepliesInput, setShowAddRepliesInput] = React.useState(false);
     const [showAllReplies, setShowAllReplies] = React.useState(false);
-    const[replyContent, setReplycontent] = React.useState("");
+    const [replyContent, setReplycontent] = React.useState("");
     const [isAddingReply, setIsAddingReply] = React.useState(false);
 
     const {
@@ -21,21 +26,43 @@ function CommentCard({ comment, onLike, onUnLike }) {
         addComment,
         likeComment,
         unLikeComment,
-        repliesByCommentId,
         isReplyAlreadyFetched,
         isFetchingReplies,
     } = usePostStore();
 
+    const replies = usePostStore(
+        (state) => state.repliesByCommentId[comment._id],
+    );
+
+    React.useEffect(() => {
+        setIsCommmentLikedByMe(comment.isLikedByMe);
+    }, [comment.isLikedByMe]);
+
+    React.useEffect(() => {
+        setReplyCount(comment.repliesCount);
+    }, [comment.repliesCount]);
+
     const handleAddingComment = async () => {
-        if(!replyContent?.trim() || replyContent.trim().length === 0 || isAddingReply) return;
+        if (
+            !replyContent?.trim() ||
+            replyContent.trim().length === 0 ||
+            isAddingReply
+        )
+            return;
         setIsAddingReply(true);
-        const res = await addComment(comment.post, { content: replyContent, repliedTo:comment.commentedBy._id,parentComment:comment._id });
+        const res = await addComment(comment.post, {
+            content: replyContent,
+            repliedTo: comment.commentedBy._id,
+            parentComment: comment._id,
+        });
         if (res?.success) {
             setReplycontent("");
-            comment.repliesCount = comment.repliesCount + 1;
+            setReplyCount((prev) => prev + 1);
+            setShowAddRepliesInput(false);
+            setShowAllReplies(true);
         }
         setIsAddingReply(false);
-    }
+    };
 
     const handleShowingReplies = async () => {
         if (!showAllReplies) {
@@ -52,7 +79,6 @@ function CommentCard({ comment, onLike, onUnLike }) {
     };
 
     const likeCommentHandler = async () => {
-        console.log("clicked");
         if (isCommentLikedByMe) {
             await onUnLike(comment._id);
             setIsCommmentLikedByMe(false);
@@ -60,6 +86,14 @@ function CommentCard({ comment, onLike, onUnLike }) {
             await onLike(comment._id);
             setIsCommmentLikedByMe(true);
         }
+    };
+
+    const replyLikeHandler = async (replyId) => {
+        return likeComment(comment.post, replyId, comment._id);
+    };
+
+    const replyUnLikeHandler = async (replyId) => {
+        return unLikeComment(comment.post, replyId, comment._id);
     };
 
     return (
@@ -83,7 +117,7 @@ function CommentCard({ comment, onLike, onUnLike }) {
                         {comment.content}
                     </div>
                 </div>
-                <div className="flex gap-4 text-gray-500 dark:text-gray-500">
+                <div className="flex gap-4 text-gray-500 dark:text-gray-500 pb-2">
                     <div>
                         <span className=" text-sm">
                             {timeAgo(comment.createdAt)}
@@ -101,13 +135,19 @@ function CommentCard({ comment, onLike, onUnLike }) {
                         <span>{comment.likeCount}</span>
                     </div>
                     <button
-                        onClick={() => setShowAddRepliesInput((prev) => !prev)}
+                        onClick={() => {
+                            setShowAddRepliesInput((prev) => !prev);
+                            setTimeout(
+                                () => replyInputRef?.current?.focus(),
+                                100,
+                            );
+                        }}
                         className="flex gap-1 items-center"
                     >
                         <FaComment />
                         <span>Reply</span>
                     </button>
-                    {comment.repliesCount > 0 && (
+                    {replyCount > 0 && (
                         <button
                             onClick={handleShowingReplies}
                             className="flex items-center text-indigo-500 gap-1"
@@ -122,47 +162,65 @@ function CommentCard({ comment, onLike, onUnLike }) {
                             <span>
                                 {showAllReplies
                                     ? "Hide replies"
-                                    : `View ${comment.repliesCount} replies`}
+                                    : `View ${replyCount} replies`}
                             </span>
                         </button>
                     )}
                 </div>
                 {showAddRepliesInput && (
-                    <div className="flex gap-1">
-                        <div className="flex-1 items-center pt-5">
+                    <motion.div
+                        className=" flex items-center gap-2 py-2 "
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <motion.div className="flex-1">
                             <input
                                 value={replyContent}
-                                onChange={(e) => setReplycontent(e.target.value)}
+                                ref={replyInputRef}
+                                onChange={(e) =>
+                                    setReplycontent(e.target.value)
+                                }
                                 placeholder={"Add a comment..."}
-                                className="p-2 px-3 bg-gray-200 dark:bg-gray-800 w-full rounded-xl outline-1 outline-gray-400"
+                                className="outline-1 focus:outline-1 focus:outline-gray-400 outline-gray-300 w-full bg-gray-300 p-1 rounded-2xl text-gray-600 px-3 dark:outline-gray-500"
                             />
-                        </div>
+                        </motion.div>
                         {/* comment button */}
-                        <button
+                        <motion.button
                             onClick={handleAddingComment}
-                            className="px-3 text-white bg-indigo-500 rounded-xl"
+                            className="bg-indigo-500 text-white px-4 py-1 rounded-2xl hover:text-blue-600 hover:bg-white hover:border hover:border-indigo-500 border border-transparent"
+                            disabled={isAddingReply}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
                         >
-                            Comment
-                        </button>
-                    </div>
+                            <IoIosSend className="h-5 w-5" />
+                        </motion.button>
+                    </motion.div>
                 )}
                 {/* replies */}
                 {showAllReplies &&
                     isReplyAlreadyFetched[comment._id] &&
-                    repliesByCommentId[comment._id] &&
-                    (repliesByCommentId[comment._id].length === 0 ? (
+                    replies &&
+                    (replies.length === 0 ? (
                         <div className="text-gray-500 dark:text-gray-500">
                             No replies yet
                         </div>
                     ) : (
-                        repliesByCommentId[comment._id].map((reply) => (
-                            <CommentCard
-                                key={reply._id}
-                                comment={reply}
-                                onLike={likeComment}
-                                onUnLike={unLikeComment}
-                            />
-                        ))
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="flex flex-col gap-2"
+                        >
+                            {replies.map((reply) => (
+                                <ReplyCard
+                                    key={reply._id}
+                                    comment={reply}
+                                    onLike={replyLikeHandler}
+                                    onUnLike={replyUnLikeHandler}
+                                />
+                            ))}
+                        </motion.div>
                     ))}
             </div>
         </div>

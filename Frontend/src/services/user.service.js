@@ -41,6 +41,7 @@ export const userServices = {
     },
     getAllFollowers: async (id) => {
         const response = await api.get(`/users/${id}/followers`);
+        console.log(response.data);
         return response.data
     },
     getAllFollowing: async (id) => {
@@ -50,5 +51,21 @@ export const userServices = {
     getUserDetails: async(id) => {
         const response = await api.get(`/users/${id}`);
         return response.data;
+    },
+     getAllFollowing:async (id) => {
+        const response = await api.get(`/users/${id}/following`);
+        return response.data;
+    },
+    getAllFollowers:async (id) => {
+        const response = await api.get(`/users/${id}/followers`);
+        return response.data
+    },
+    getAllPostByUser:async (id) => {
+        const response = await api.get(`/users/${id}/posts`);
+        return response.data
+    },
+    getAllLikedPostByUser:async () => {
+        const response = await api.get(`/users/liked-posts`);
+        return response.data
     }
 };

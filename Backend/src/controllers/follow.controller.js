@@ -109,48 +109,64 @@ const unFollowUser = async (req, res) => {
 };
 const getAllFollowers = async (req, res) => {
     try {
-        const userId = new mongoose.Types.ObjectId(req.params.id);
-
-        const isUserExist = await User.exists({ _id: userId });
-
-        if (!isUserExist) {
-            return res.status(404).json({
-                message: "User not found",
-                success: false,
-            });
+        const {id} = req.params;
+        if(!mongoose.Types.ObjectId.isValid(id)){
+            return res.status(400).json({
+                message:"Invalid user id",
+                success:false
+            })
         }
 
-        const allFollowers = await Follow.aggregate([
+        const userObjectId = new mongoose.Types.ObjectId(id);
+
+        const allFollower = await Follow.aggregate([
             {
-                $match: { following: userId },
+                $match: { following: userObjectId },
             },
             {
-                $lookup: {
-                    from: "users",
-                    localField: "follower",
-                    foreignField: "_id",
-                    as: "follower",
-                },
+                $lookup:{
+                    from:"users",
+                    let:{follower:"$follower"},
+                    pipeline:[
+                        {
+                            $match:{$expr:{$eq:["$_id","$$follower"]}}
+                        },
+                        {
+                            $project:{
+                                _id:1,
+                                fullname:1,
+                                username:1,
+                                avatarURL:1,
+                                followersCount:1
+                            }
+                        }
+                    ],
+                    as:"follower"
+                }
             },
             {
-                $unwind: "$follower",
+                $unwind:"$follower",
             },
             {
                 $project: {
                     _id:"$follower._id",
                     fullname:"$follower.fullname",
-                    followersCount:"$follower.followersCount",
+                    username:"$follower.username",
+                    avatarURL:"$follower.avatarURL",
+                    followersCount:"$follower.followersCount"
                 },
-            },
-        ]);
+            }
+        ])
 
         return res
                 .status(200)
                 .json({
                     message:"All followers fetched successfully",
-                    data:allFollowers,
+                    followers:allFollower,
                     success:true,
                 })
+
+        
     } catch (error) {
         console.log("Error at get all follower:", error?.message);
         return res
@@ -161,29 +177,44 @@ const getAllFollowers = async (req, res) => {
                 })
     }
 };
+
 const getAllFollowing = async (req, res) => {
     try {
-        const userId = new mongoose.Types.ObjectId(req.params.id);
+        const {id} = req.params;
 
-        const isUserExist = await User.exists({ _id: userId });
-
-        if (!isUserExist) {
-            return res.status(404).json({
-                message: "User not found",
-                success: false,
-            });
+        if(!mongoose.Types.ObjectId.isValid(id)){
+            return res.status(400).json({
+                message:"Invalid user id",
+                success:false
+            })
         }
+
+        const userObjectId = new mongoose.Types.ObjectId(id);
+
 
         const allFollowing = await Follow.aggregate([
             {
-                $match: { follower: userId },
+                $match: { follower: userObjectId },
             },
             {
                 $lookup: {
                     from: "users",
-                    localField: "following",
-                    foreignField: "_id",
-                    as: "following",
+                    let:{following:"$following"},
+                    pipeline:[
+                        {
+                            $match:{$expr:{$eq:["$_id","$$following"]}}
+                        },
+                        {
+                            $project:{
+                                _id:1,
+                                fullname:1,
+                                followersCount:1,
+                                username:1,
+                                avatarURL:1,
+                            }
+                        }
+                    ],
+                    as:"following",
                 },
             },
             {
@@ -194,6 +225,8 @@ const getAllFollowing = async (req, res) => {
                     _id:"$following._id",
                     fullname:"$following.fullname",
                     followersCount:"$following.followersCount",
+                    username:"$following.username",
+                    avatarURL:"$following.avatarURL",
                 },
             },
         ]);
@@ -202,7 +235,7 @@ const getAllFollowing = async (req, res) => {
                 .status(200)
                 .json({
                     message:"All following fetched successfully",
-                    data:allFollowing,
+                    followings:allFollowing,
                     success:true,
                 })
     } catch (error) {

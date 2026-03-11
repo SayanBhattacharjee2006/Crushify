@@ -11,8 +11,8 @@ router.post("/avatar",upload.single("avatar"),setAvatar); // frontend done
 router.delete("/avatar",deleteAvatar);
 router.post("/complete-profile",completeProfile); // frontend done
 router.patch("/complete-profile",updateProfile);
-router.get("/liked-posts",getAllLikedPosts);
+router.get("/liked-posts",getAllLikedPosts);// frontend done
 router.get("/:id",getUserDetails); // frontend done
-router.get("/:id/posts",getAllPostsByUserId);
+router.get("/:id/posts",getAllPostsByUserId);//frontend done
 
 export default router;

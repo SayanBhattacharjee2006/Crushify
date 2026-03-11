@@ -249,4 +249,53 @@ export const useAuthStore = create((set) => ({
             };
         }
     },
+    getAllFollowers: async (id) => {
+        try {
+            const res = await userServices.getAllFollowers(id);
+            console.log(res);
+            return {
+                success: true,
+                followers: res.followers,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error:
+                    error.response?.data?.message ||
+                    "Fetching followers failed. Try again.",
+            };
+        }
+    },
+    getAllFollowing: async (id) => {
+        try{
+            const res = await userServices.getAllFollowing(id);
+            return {
+                success: true,
+                following: res.followings,
+            };
+        }catch(error){
+            return {
+                success: false,
+                error:
+                    error.response?.data?.message ||
+                    "Fetching following failed. Try again.",
+            };
+        }
+    },
+    getAllPostByUser: async (id) => {
+        try{
+            const res = await userServices.getAllPostByUser(id);
+            return {
+                success: true,
+                posts: res.posts,
+            };
+        }catch(error){
+            return {
+                success: false,
+                error:
+                    error.response?.data?.message ||
+                    "Fetching posts failed. Try again.",
+            };
+        }
+    },
 }));

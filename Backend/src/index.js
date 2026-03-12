@@ -3,16 +3,19 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import passport from "passport"
 // import "./config/passport.js"
-
+import {createServer} from "http"
+import { initSocket } from "./config/socket.js"
 
 //routes imports
 import authRouter from "./routes/auth.route.js"
 import followRouter from "./routes/follow.route.js"
 import userRouter from "./routes/user.route.js"
 import postRouter from "./routes/post.route.js"
-
+import conversationRouter from "./routes/message.route.js"
 
 const app = express();
+const httpServer = createServer(app);
+initSocket(httpServer);
 
 //middlewares
 app.use(passport.initialize());
@@ -31,10 +34,11 @@ app.use("/api/v1/auth",authRouter);
 app.use("/api/v1/users",followRouter);
 app.use("/api/v1/users",userRouter);
 app.use("/api/v1/posts",postRouter);
+app.use("/api/v1/conversations",conversationRouter);
 
 
 app.get("/",(req,res)=>{
     res.send("I am running")
 })
 
-export default app;
+export default httpServer;

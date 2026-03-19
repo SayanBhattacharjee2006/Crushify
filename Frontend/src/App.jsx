@@ -16,7 +16,8 @@ import ProfileLayout from "./layouts/ProfileLayout.jsx";
 import ProfilePosts from "./components/ProfilePosts.jsx";
 import ProfileFollowers from "./components/ProfileFollowers.jsx";
 import ProfileFollowing from "./components/ProfileFollowing.jsx";
-
+import ChatPage from "./pages/ChatPage.jsx";
+import ConversationsListPage from "./pages/ConversationsListPage.jsx";
 
 function App() {
     const { checkAuth } = useAuthStore();
@@ -60,6 +61,8 @@ function App() {
                     <Route path="followers" element={<ProfileFollowers/>} />
                     <Route path="following" element={<ProfileFollowing />} />
                 </Route>
+                <Route path="messages" element={<ConversationsListPage />} />
+                <Route path="messages/:id" element={<ChatPage />} />
             </Route>
         </Routes>
     );

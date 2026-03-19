@@ -5,7 +5,9 @@ import { IoMdSunny } from "react-icons/io";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/auth.store";
 import { CgProfile } from "react-icons/cg";
-
+import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
+import { FaHome } from "react-icons/fa";
+import { IoIosLogOut } from "react-icons/io";
 
 function Navbar() {
     const [theme, setTheme] = useState("light");
@@ -45,7 +47,13 @@ function Navbar() {
                     <div className="flex gap-3 sm:gap-5">
                         <NavLink to="/app/home">
                             <span className="text-xl hover:text-[#4F39F6] dark:hover:text-[#4F39F6]">
-                                Home
+                                <FaHome size={25} />
+                            </span>
+                        </NavLink>
+
+                        <NavLink to="/app/messages">
+                            <span className="text-xl hover:text-[#4F39F6] dark:hover:text-[#4F39F6]">
+                                <IoChatbubbleEllipsesOutline size={25} />
                             </span>
                         </NavLink>
 
@@ -56,7 +64,7 @@ function Navbar() {
                         </NavLink>
                         {isAuthenticated && <button onClick={handleLogout} >
                             <span className="text-xl dark:hover:text-[#4F39F6]">
-                                logout
+                                <IoIosLogOut size={25} />
                             </span>
                         </button>}
                     </div>

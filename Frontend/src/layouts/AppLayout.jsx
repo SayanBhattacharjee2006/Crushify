@@ -3,11 +3,11 @@ import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useAuthStore } from "../stores/auth.store";
 import { useNavigate } from "react-router-dom";
-
+import useSocketListener from "../hooks/UseSocketListener.jsx";
 function AppLayout() {
     const { isAuthenticated, isLoading } = useAuthStore();
     const navigate = useNavigate();
-
+    useSocketListener();
     useEffect(() => {
         if (isLoading) return;
 

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { authServices } from "../services/auth.service";
 import { userServices } from "../services/user.service";
+import { connectSocket, disconnectSocket } from "../services/socket.services.js";
 
 export const useAuthStore = create((set) => ({
     user: null,
@@ -38,6 +39,7 @@ export const useAuthStore = create((set) => ({
                 isAuthenticated: true,
                 user: data.user,
             });
+            connectSocket(localStorage.getItem("token"));
             return { success: true };
         } catch (error) {
             set({
@@ -60,6 +62,7 @@ export const useAuthStore = create((set) => ({
                 isAuthenticated: false,
                 user: null,
             });
+            disconnectSocket();
             return { success: true };
         } catch (error) {
             set({
@@ -90,6 +93,7 @@ export const useAuthStore = create((set) => ({
                 isAuthenticated: true,
                 user: data.user,
             });
+            connectSocket(token);
         } catch (error) {
             localStorage.removeItem("token"); // if any error occured during the fetching of user data from server then remove the cookie from localstorage
             set({ isLoading: false, isAuthenticated: false, user: null });

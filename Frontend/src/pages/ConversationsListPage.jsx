@@ -20,7 +20,7 @@ function ConversationsListPage() {
     }, [fetchConversations]);
 
     const getOtherParticipant = (conversation, userId) =>
-        conversation.participants.find((participant) => participant._id !== userId);
+        conversation.participants.find((participant) => participant._id.toString() !== userId.toString());
 
     if (isConversationLoading) {
         return <div>Loading...</div>;

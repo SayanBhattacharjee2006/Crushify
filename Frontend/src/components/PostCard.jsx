@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import React from "react";
 import { motion } from "motion/react";
 import { timeAgo } from "../utils/timeAgo.js";
+import { Link } from "react-router-dom";
 
 function PostCard({ post, onFollow, onUnFollow, onPostLike, onPostUnLike }) {
     const { user } = useAuthStore();
@@ -15,6 +16,9 @@ function PostCard({ post, onFollow, onUnFollow, onPostLike, onPostUnLike }) {
     const [isShowLikeAnimation, setisShowLikeAnimation] = useState(false);
     const [isFollowUpdating, setIsFollowUpdating] = useState(false);
     const navigate = useNavigate();
+
+
+    console.log("Uploader: ", post.uploader);
 
     const handleFollow = async (e) => {
         if (isFollowUpdating) return;
@@ -66,12 +70,13 @@ function PostCard({ post, onFollow, onUnFollow, onPostLike, onPostUnLike }) {
         }
     };
 
+
     return (
         <div className="border p-4 rounded-2xl border-gray-200 dark:border-gray-600 shadow-md flex flex-col gap-3 dark:shadow-gray-800">
             {/* uploader Information */}
             <div className="flex justify-between items-center w-full px-2 ">
                 {/* uploader profile pic and name */}
-                <div className="flex gap-2 justify-center text-center items-center">
+                <Link to={`/app/profile/${post?.uploader?._id}`} className="flex gap-2 justify-center text-center items-center">
                     <motion.div
                      
                      onClick={()=>navigate(`/app/post/${post._id}`)}
@@ -86,15 +91,15 @@ function PostCard({ post, onFollow, onUnFollow, onPostLike, onPostUnLike }) {
                             loading="lazy"
                         />
                     </motion.div>
-                    <div className="flex flex-col items-start px-1 md:px-2">
+                    <Link to={`/app/profile/${post?.uploader?._id}`} className="flex flex-col items-start px-1 md:px-2">
                         <span className="font-semibold text-lg md:text-xl leading-5">
                             {post?.uploader?.fullname}
                         </span>
                         <span className="text-sm text-gray-500">
                             @{post?.uploader?.username || "username"}
                         </span>
-                    </div>
-                </div>
+                    </Link>
+                </Link>
                 {/* follow unfollow button */}
                 {post?.uploader?._id !== user._id && (
                     <div className="text-lg md:text-xl">

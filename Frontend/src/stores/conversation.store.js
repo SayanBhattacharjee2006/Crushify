@@ -92,7 +92,6 @@ export const useConversationStore = create((set, get) => ({
                 cursor,
             );
             set((state) => ({
-                ...state,
                 messages: {
                     [convoId]: loadMore
                         ? [...state.messages[convoId], ...res.messages]
@@ -186,7 +185,7 @@ export const useConversationStore = create((set, get) => ({
             });
     },
 
-    isUserOnline: async (userId) => get().onlineUsers.includes(userId),
+    isUserOnline:  (userId) => get().onlineUsers.includes(userId),
 
     setOnlineUser: async (userIds) => set({ onlineUsers: userIds }),
 

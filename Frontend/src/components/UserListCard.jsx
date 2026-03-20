@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 function UserListCard({ user }) {
+    console.log("user",user);
     const navigate = useNavigate()
     return (
         <motion.div className="flex gap-2 p-2 rounded-2xl bg-zinc-200 dark:bg-gray-600">

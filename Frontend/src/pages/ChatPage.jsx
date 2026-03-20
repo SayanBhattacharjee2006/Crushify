@@ -7,6 +7,7 @@ import { getSocket } from "../services/socket.services";
 import UserListCard from "../components/UserListCard.jsx";
 
 function ChatPage() {
+
     const { id: conversationId } = useParams();
     const navigate = useNavigate();
     const bottomRef = useRef(null);
@@ -34,7 +35,7 @@ function ChatPage() {
     );
 
     const otherUser = conversation?.participants.find(
-        (p) => p._id !== user._id,
+        (p) => p._id.toString() !== user._id.toString(),
     );
 
     useEffect(() => {
@@ -49,7 +50,7 @@ function ChatPage() {
 
     const handleSendMessage = useCallback(() => {
         if (!text.trim()) return;
-        getSocket()?.emit("send_message", { conversationId, text });
+        getSocket()?.emit("send_message", { conversationId, content: text });
         setText("");
     }, [text, conversationId]);
 

@@ -108,13 +108,22 @@ function ProfileCard() {
                         </span>
                     </div>
                     {/* Follow and unfollow button div */}
-                    {id === loggedInUserId && (
+                    {id === loggedInUserId ? (
                         <div>
                             <Link 
                                 to="/app/details"
                                 className="bg-indigo-600 text-white px-5 py-2 text-lg rounded-xl cursor-pointer"
                             >
                                 See Details
+                            </Link>
+                        </div>
+                    ):(
+                        <div>
+                            <Link 
+                                to={`/app/messages/${id}`}
+                                className="bg-indigo-600 text-white px-5 py-2 text-lg rounded-xl cursor-pointer"
+                            >
+                                Message
                             </Link>
                         </div>
                     )}

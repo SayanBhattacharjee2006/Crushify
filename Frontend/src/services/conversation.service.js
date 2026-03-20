@@ -10,7 +10,7 @@ export const conversationServices = {
         return response.data
     },
     getAllMessages: async (id,limit,cursor) => {
-        const response = await api.get(`/conversations/${id}`, {
+        const response = await api.get(`/conversations/${id}/messages`, {
             params:{limit, cursor}
         })
         return response.data

@@ -9,7 +9,7 @@ router.use(verifyJwt);
 
 router.post("/:id",getOrCreateConversation);
 router.get("/",getAllConversations);
-router.get("/:id",getMessages);
+router.get("/:id/messages",getMessages);
 
 
 

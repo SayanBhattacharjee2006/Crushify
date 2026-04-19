@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../stores/auth.store.js";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useConversationStore } from "../stores/conversation.store.js";
 
 function ProfileCard() {
     const { user, isLoading, getFollowStatus, getUserDetails, followUser, unfollowUser } = useAuthStore();
@@ -8,6 +9,9 @@ function ProfileCard() {
     const [followStatus, setFollowStatus] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const loggedInUserId = user?._id || user?.id;
+    const { openConversation } = useConversationStore();
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         if (!id || !user) return;
@@ -50,6 +54,12 @@ function ProfileCard() {
             setFollowStatus(true);
         }
     }
+
+    const handleMessageUser = async () => {
+        const convoId = await  openConversation(id);
+        navigate(`/app/messages/${convoId}`);
+    }
+
 
     return (
         <div className="flex flex-col md:flex-row p-5  gap-4 items-center md:items-start justify-evenly rounded-2xl">
@@ -119,12 +129,12 @@ function ProfileCard() {
                         </div>
                     ):(
                         <div>
-                            <Link 
-                                to={`/app/messages/${id}`}
+                            <button 
+                                onClick={handleMessageUser}
                                 className="bg-indigo-600 text-white px-5 py-2 text-lg rounded-xl cursor-pointer"
                             >
                                 Message
-                            </Link>
+                            </button>
                         </div>
                     )}
                 </div>

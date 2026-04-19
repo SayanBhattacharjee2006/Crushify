@@ -23,6 +23,7 @@ function ChatPage() {
         isLoadingMessages,
         typingUsers,
         onlineUsers,
+        fetchConversations,
         fetchMessages,
         leaveConversation,
     } = useConversationStore();
@@ -39,6 +40,9 @@ function ChatPage() {
     );
 
     useEffect(() => {
+        if(conversations.length === 0){
+            fetchConversations();
+        }
         setActiveConversation(conversationId);
         fetchMessages(conversationId);
         return () => leaveConversation(conversationId);
@@ -64,6 +68,11 @@ function ChatPage() {
     const handleLoadMore = () => {
         fetchMessages(conversationId, true);
     };
+
+    if(!conversation || !otherUser) {
+        return <div>Loading...</div>
+    }
+
 
     return (
         <div>

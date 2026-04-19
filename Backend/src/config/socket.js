@@ -9,6 +9,7 @@ const onlineUsers = new Map();
 export const getOnlineUser = () => onlineUsers;
 
 export const initSocket = (httpServer) => {
+    
     const io = new Server(httpServer, {
         cors: {
             origin: process.env.FRONTEND_URL || "http://localhost:5173",
@@ -46,14 +47,17 @@ export const initSocket = (httpServer) => {
         const userId = socket.user._id.toString();
 
         socket.join(userId); //a room created using the user id triggered when a user logs in
+        //a room created using the user id, so whenever user logsin from different devices all device's socket server are connected to the same room, this is not the message room this is the user room
 
         if (!onlineUsers.has(userId)) {
             onlineUsers.set(userId, new Set());
         }
 
-        onlineUsers.get(userId).add(socket.id);
+        onlineUsers.get(userId).add(socket.id); //add the socket id to the set of sockets for the user
+        // this is used to track the online users
 
         io.emit("online_users", Array.from(onlineUsers.keys()));
+        // we send the list of online users to all the users to show the green online indicator in the sidebar
 
         console.log(
             `🚀 ${socket.user.username} connected to socket room with socket id: ${socket.id}`,
@@ -66,6 +70,7 @@ export const initSocket = (httpServer) => {
                     _id: conversationId,
                     participants: userId,
                 });
+                //fetches the conversation data from DB which have the conversation id and the user as the participant 
 
                 if (!conversation) {
                     socket.emit("error", { message: "Conversation not found" });

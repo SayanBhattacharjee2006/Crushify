@@ -12,7 +12,7 @@ function ConversationsListPage() {
     } = useConversationStore();
     const navigate = useNavigate();
     const { user } = useAuthStore();
-    console.log("user:", user);
+    // console.log("user:", user);
     const currentUserId = user._id;
 
     React.useEffect(() => {
@@ -38,8 +38,8 @@ function ConversationsListPage() {
                             if(!otherParticipant) return null;
                             const isOtherParticipantOnline = isUserOnline(otherParticipant._id);
                             const lastMsg = conversation.lastMessage;
-                            console.log("lastMsg:", lastMsg);
-                            console.log("conversation:", conversation);
+                            // console.log("lastMsg:", lastMsg);
+                            // console.log("conversation:", conversation);
                             return (
                                 <li 
                                     key={conversation._id}

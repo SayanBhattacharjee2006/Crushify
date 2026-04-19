@@ -16,8 +16,8 @@ const useSocketListener = () => {
         const socket = getSocket();
         if (!socket) return;
 
-        const onNewMessage = ({message, conversationId}) => {
-            receiveMessage(message, conversationId);
+        const onNewMessage = (message) => {
+            receiveMessage( message.conversationId, message);
         };
 
         const onMessagesRead = ({conversationId, seenBy}) => {

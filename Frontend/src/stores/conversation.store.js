@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { getSocket } from "../services/socket.services.js";
 
 export const useConversationStore = create((set, get) => ({
-    conversations: [], // [conversationsId]
+    conversations: [], // [{conversationsId,all metadata}]
     hasMore: {}, // {[conversationRoomId] : boolean}
     isConversationLoading: false, // boolean
     messages: {}, // {[conversationRoomId] : Array<messages>}
@@ -14,7 +14,6 @@ export const useConversationStore = create((set, get) => ({
     onlineUsers: [], // Array<userId>
 
     // conversations related store functions---------------
-
     fetchConversations: async () => {
         try {
             set({ isConversationLoading: true });
@@ -85,21 +84,23 @@ export const useConversationStore = create((set, get) => ({
         try {
             const cursor = loadMore ? get().nextCursor[convoId] : null;
             const limit = loadMore ? 10 : 30;
-
+            console.log("Fetching messages for", convoId);
             const res = await conversationServices.getAllMessages(
                 convoId,
                 limit,
                 cursor,
             );
+            console.log("FETCHED MESSAGES", res);
             set((state) => ({
                 messages: {
                     [convoId]: loadMore
-                        ? [...state.messages[convoId], ...res.messages]
-                        : res.messages,
+                    ? [...state.messages[convoId], ...res.messages]
+                    : res.messages,
                 },
                 hasMore: { ...state.hasMore, [convoId]: res.hasMore },
                 nextCursor: { ...state.nextCursor, [convoId]: res.nextCursor },
             }));
+            console.log("Messages in store: ", get().messages);
         } catch (error) {
             console.error("FETCH MESSAGES ERROR:", error);
         } finally {

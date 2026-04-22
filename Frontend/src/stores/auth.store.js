@@ -6,6 +6,7 @@ import { connectSocket, disconnectSocket } from "../services/socket.services.js"
 export const useAuthStore = create((set) => ({
     user: null,
     isLoading: false,
+    isCheckingAuth: true,
     isAuthenticated: false,
 
     register: async (fullname, email, password) => {
@@ -14,6 +15,7 @@ export const useAuthStore = create((set) => ({
             const data = await authServices.register(fullname, email, password);
             set({
                 isLoading: false,
+                isCheckingAuth: false,
                 isAuthenticated: true,
                 user: data.user,
             });
@@ -21,6 +23,7 @@ export const useAuthStore = create((set) => ({
         } catch (error) {
             set({
                 isLoading: false,
+                isCheckingAuth: false,
             });
             return {
                 success: false,
@@ -36,6 +39,7 @@ export const useAuthStore = create((set) => ({
             const data = await authServices.login(email, password);
             set({
                 isLoading: false,
+                isCheckingAuth: false,
                 isAuthenticated: true,
                 user: data.user,
             });
@@ -44,6 +48,7 @@ export const useAuthStore = create((set) => ({
         } catch (error) {
             set({
                 isLoading: false,
+                isCheckingAuth: false,
             });
             return {
                 success: false,
@@ -59,6 +64,7 @@ export const useAuthStore = create((set) => ({
             const data = await authServices.logout();
             set({
                 isLoading: false,
+                isCheckingAuth: false,
                 isAuthenticated: false,
                 user: null,
             });
@@ -67,6 +73,7 @@ export const useAuthStore = create((set) => ({
         } catch (error) {
             set({
                 isLoading: false,
+                isCheckingAuth: false,
                 isAuthenticated: false,
                 user: null,
             });
@@ -76,11 +83,13 @@ export const useAuthStore = create((set) => ({
         }
     },
     checkAuth: async () => {
+        set({ isCheckingAuth: true });
         const token = localStorage.getItem("token");
         if (!token) {
             set({
                 isAuthenticated: false,
                 user: null,
+                isCheckingAuth: false,
             });
             return;
         }
@@ -90,13 +99,19 @@ export const useAuthStore = create((set) => ({
             const data = await authServices.getCurrentUser();
             set({
                 isLoading: false,
+                isCheckingAuth: false,
                 isAuthenticated: true,
                 user: data.user,
             });
             connectSocket(token);
         } catch (error) {
             localStorage.removeItem("token"); // if any error occured during the fetching of user data from server then remove the cookie from localstorage
-            set({ isLoading: false, isAuthenticated: false, user: null });
+            set({
+                isLoading: false,
+                isCheckingAuth: false,
+                isAuthenticated: false,
+                user: null,
+            });
         }
     },
     uploadProfilePicture: async (file) => {
@@ -291,7 +306,7 @@ export const useAuthStore = create((set) => ({
             const res = await userServices.getAllPostByUser(id);
             return {
                 success: true,
-                posts: res.posts,
+                posts: res.allPosts,
             };
         }catch(error){
             return {

@@ -5,7 +5,7 @@ import { useAuthStore } from "../stores/auth.store";
 function OAuthCallback() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { checkAuth } = useAuthStore();
+    const checkAuth = useAuthStore((state) => state.checkAuth);
 
     useEffect(() => {
         (async () => {

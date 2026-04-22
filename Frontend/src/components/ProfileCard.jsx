@@ -4,23 +4,22 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useConversationStore } from "../stores/conversation.store.js";
 
 function ProfileCard() {
-    const { user, isLoading, getFollowStatus, getUserDetails, followUser, unfollowUser } = useAuthStore();
+    const {
+        user,
+        getFollowStatus,
+        getUserDetails,
+        followUser,
+        unfollowUser,
+    } = useAuthStore();
     const { id } = useParams();
     const [followStatus, setFollowStatus] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
-    const loggedInUserId = user?._id || user?.id;
+    const loggedInUserId = user?._id?.toString() || user?.id?.toString();
     const { openConversation } = useConversationStore();
     const navigate = useNavigate();
 
-
     useEffect(() => {
-        if (!id || !user) return;
-
-        getFollowStatus(id).then((res) => {
-            if (res.success) {
-                setFollowStatus(Boolean(res.followStatus));
-            }
-        });
+        if (!id || !loggedInUserId) return;
 
         if (id === loggedInUserId) {
             setCurrentUser(user);
@@ -30,11 +29,22 @@ function ProfileCard() {
         getUserDetails(id).then((res) => {
             if (res.success && res.user) {
                 setCurrentUser(res.user);
-                return;
             }
-            setCurrentUser(null);
         });
-    }, [id, user, loggedInUserId, getFollowStatus, getUserDetails, setFollowStatus, followStatus]);
+    }, [id, loggedInUserId]);
+
+    // fetch follow status only when the profile being viewed is not of the logged in user and id and loggedInUserId is available
+    useEffect(() => {
+        if (!id || !loggedInUserId) return;
+
+        if (id === loggedInUserId) {
+            return;
+        }
+
+        getFollowStatus(id).then((res) => {
+            if(res.success) setFollowStatus(res.followStatus);
+        });
+    }, [id, loggedInUserId]);
 
     const handleUnfollow = async (e) => {
         e.preventDefault();
@@ -43,23 +53,22 @@ function ProfileCard() {
         if (res.success) {
             setFollowStatus(false);
         }
-    }
+    };
 
     const handleFollow = async (e) => {
         e.preventDefault();
-    
+
         const res = await followUser(id);
 
         if (res.success) {
             setFollowStatus(true);
         }
-    }
+    };
 
     const handleMessageUser = async () => {
-        const convoId = await  openConversation(id);
+        const convoId = await openConversation(id);
         navigate(`/app/messages/${convoId}`);
-    }
-
+    };
 
     return (
         <div className="flex flex-col md:flex-row p-5  gap-4 items-center md:items-start justify-evenly rounded-2xl">
@@ -76,17 +85,17 @@ function ProfileCard() {
                 {/* edit button */}
                 {id === loggedInUserId ? (
                     <div>
-                        <Link 
-                        to="/app/edit-profile"
-                        className="bg-indigo-600 text-white px-5 py-2 text-lg rounded-xl cursor-pointer"
-                    >
+                        <Link
+                            to="/app/edit-profile"
+                            className="bg-indigo-600 text-white px-5 py-2 text-lg rounded-xl cursor-pointer"
+                        >
                             Edit Profile
                         </Link>
                     </div>
                 ) : followStatus ? (
                     <div>
                         <button
-                             className="bg-indigo-600 text-white px-5 py-2 text-lg rounded-xl cursor-pointer"
+                            className="bg-indigo-600 text-white px-5 py-2 text-lg rounded-xl cursor-pointer"
                             onClick={handleUnfollow}
                         >
                             unfollow
@@ -94,7 +103,7 @@ function ProfileCard() {
                     </div>
                 ) : (
                     <div>
-                        <button 
+                        <button
                             onClick={handleFollow}
                             className="bg-indigo-600 text-white px-5 py-2 text-lg rounded-xl cursor-pointer"
                         >
@@ -120,16 +129,16 @@ function ProfileCard() {
                     {/* Follow and unfollow button div */}
                     {id === loggedInUserId ? (
                         <div>
-                            <Link 
+                            <Link
                                 to="/app/details"
                                 className="bg-indigo-600 text-white px-5 py-2 text-lg rounded-xl cursor-pointer"
                             >
                                 See Details
                             </Link>
                         </div>
-                    ):(
+                    ) : (
                         <div>
-                            <button 
+                            <button
                                 onClick={handleMessageUser}
                                 className="bg-indigo-600 text-white px-5 py-2 text-lg rounded-xl cursor-pointer"
                             >

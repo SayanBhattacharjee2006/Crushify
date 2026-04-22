@@ -39,15 +39,6 @@ export const userServices = {
         const response = await api.delete(`/users/${id}/follow`);
         return response.data
     },
-    getAllFollowers: async (id) => {
-        const response = await api.get(`/users/${id}/followers`);
-        console.log(response.data);
-        return response.data
-    },
-    getAllFollowing: async (id) => {
-        const response = await api.get(`/users/${id}/following`);
-        return response.data
-    },
     getUserDetails: async(id) => {
         const response = await api.get(`/users/${id}`);
         return response.data;

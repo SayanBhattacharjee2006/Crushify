@@ -5,18 +5,19 @@ import { useAuthStore } from "../stores/auth.store";
 import { useNavigate } from "react-router-dom";
 import useSocketListener from "../hooks/UseSocketListener.jsx";
 function AppLayout() {
-    const { isAuthenticated, isLoading } = useAuthStore();
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
     const navigate = useNavigate();
     useSocketListener();
     useEffect(() => {
-        if (isLoading) return;
+        if (isCheckingAuth) return;
 
         const token = localStorage.getItem("token");
         // Avoid redirecting before checkAuth completes when a token exists.
         if (!isAuthenticated && !token) {
             navigate("/login", { replace: true });
         }
-    }, [isAuthenticated, isLoading, navigate]);
+    }, [isAuthenticated, isCheckingAuth, navigate]);
 
     return (
         <>

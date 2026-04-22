@@ -18,16 +18,12 @@ import ProfileFollowers from "./components/ProfileFollowers.jsx";
 import ProfileFollowing from "./components/ProfileFollowing.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
 import ConversationsListPage from "./pages/ConversationsListPage.jsx";
-
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 function App() {
-    const { checkAuth } = useAuthStore();
+    const checkAuth = useAuthStore((state) => state.checkAuth);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        // console.log("token:", token);
-        if (token) {
-            checkAuth();
-        }
+        checkAuth();
     }, [checkAuth]);
 
     return (
@@ -47,7 +43,13 @@ function App() {
                 element={<Navigate to="/app/complete-profile" replace />}
             />
 
-            <Route path="/app" element={<AppLayout />}>
+            <Route 
+                path="/app" 
+                element={
+                    <ProtectedRoute>
+                        <AppLayout />
+                    </ProtectedRoute>
+                    }>
                 <Route
                     path="add-profile-picture"
                     element={<AddProfilePicture />}

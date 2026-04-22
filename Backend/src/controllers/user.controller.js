@@ -156,7 +156,10 @@ const updateProfile = async (req, res) => {
 
         //check is user exist with username
 
-        const isUsernameAlreadyExist = await User.exists({ username });
+        const isUsernameAlreadyExist = await User.exists({
+            username,
+            _id: { $ne: userId },
+        });
 
         if (isUsernameAlreadyExist) {
             return res.status(400).json({
@@ -165,16 +168,29 @@ const updateProfile = async (req, res) => {
             });
         }
 
-        await User.findByIdAndUpdate(userId, {
-            $set: {
-                fullName,
-                bio,
-                pronouns,
-                phoneNumber,
-                gender,
-                age,
-                username,
+        const updaterUser = await User.findByIdAndUpdate(
+            userId,
+            {
+                $set: {
+                    fullname: fullName,
+                    bio,
+                    pronouns,
+                    phoneNumber,
+                    gender,
+                    age,
+                    username,
+                },
             },
+            {
+                new: true,
+                select: "-password",
+            },
+        );
+
+        return res.status(200).json({
+            message: "Profile updated successfully",
+            success: true,
+            user: updaterUser,
         });
     } catch (error) {
         console.log("Error at updating profile:", error?.message);
@@ -285,6 +301,7 @@ const getAllPostsByUserId = async (req, res) => {
                     commentsCount: 1,
                     likeCount: 1,
                     uploader: 1,
+                    imageURL: 1,
                 },
             },
             {
@@ -342,12 +359,12 @@ const getAllLikedPosts = async (req, res) => {
                                 $expr: {
                                     $eq: ["$_id", "$$postId"],
                                 },
-                                isDeleted:false,
+                                isDeleted: false,
                             },
                         },
                         {
                             $project: {
-                                _id:1,
+                                _id: 1,
                                 description: 1,
                                 imageURL: 1,
                                 likeCount: 1,
@@ -366,7 +383,7 @@ const getAllLikedPosts = async (req, res) => {
             },
             {
                 $limit: limit,
-            }
+            },
         ]);
 
         return res.status(200).json({
@@ -378,7 +395,10 @@ const getAllLikedPosts = async (req, res) => {
             success: true,
         });
     } catch (error) {
-        console.log("Error at fetching all liked posts by user", error?.message)
+        console.log(
+            "Error at fetching all liked posts by user",
+            error?.message,
+        );
         return res.status(500).json({
             message: "Error at fetching all liked posts by user",
             success: false,
@@ -393,5 +413,5 @@ export {
     updateProfile,
     getUserDetails,
     getAllPostsByUserId,
-    getAllLikedPosts
+    getAllLikedPosts,
 };
